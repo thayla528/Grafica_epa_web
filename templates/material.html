@@ -1,0 +1,525 @@
+<!DOCTYPE html><html class="dark" data-bs-theme="dark" lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Controle de Materiais de Consumo — Gráfica EPA</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Bootstrap 5.3.3 CSS via CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons via CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #080a0d;
+      color: #e1e2ee;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar-custom {
+      background-color: #0b1a2e !important;
+      border-bottom: 1px solid #1a2942 !important;
+    }
+
+    .navbar-brand-badge {
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: rgba(13, 110, 253, 0.15) !important;
+      color: #79b5ff !important;
+      border: 1px solid rgba(13, 110, 253, 0.35) !important;
+    }
+
+    /* Cards Dark Neon */
+    .card-neon {
+      background-color: #11161d !important;
+      border: 1px solid #1e293b !important;
+      transition: all 0.3s ease;
+    }
+    .card-neon:hover {
+      border-color: #0d6efd !important;
+      box-shadow: 0 0 16px rgba(13, 110, 253, 0.45) !important;
+      transform: translateY(-1px);
+    }
+
+    .card-header-dark {
+      background-color: #131923 !important;
+      border-bottom: 1px solid #1e293b !important;
+    }
+
+    /* Inputs e Controles */
+    .form-control, .form-select, .input-group-text {
+      background-color: #0d1219 !important;
+      border-color: #1e293b !important;
+      color: #e1e2ee !important;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #0d6efd !important;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+      background-color: #0e141d !important;
+      color: #ffffff !important;
+    }
+    .form-control::placeholder {
+      color: #64748b !important;
+    }
+    .form-label {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 0.35rem;
+    }
+
+    /* Tabela */
+    .table {
+      --bs-table-bg: transparent;
+      --bs-table-hover-bg: rgba(255, 255, 255, 0.025);
+      --bs-table-hover-color: #ffffff;
+      color: #cbd5e1;
+      border-color: #1e293b;
+    }
+    .table th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #899bb5;
+      font-weight: 600;
+      background-color: #0e131b !important;
+      border-bottom: 1px solid #1e293b !important;
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
+    }
+    .table td {
+      vertical-align: middle;
+      font-size: 0.875rem;
+      padding-top: 0.85rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    /* Badges Customizadas Dark Precision */
+    .badge-category {
+      font-weight: 500;
+      padding: 0.35em 0.75em;
+      font-size: 0.75rem;
+    }
+
+    /* Paginação Dark */
+    .pagination .page-link {
+      background-color: #0e131b;
+      border-color: #1e293b;
+      color: #94a3b8;
+    }
+    .pagination .page-link:hover {
+      background-color: #1e293b;
+      color: #ffffff;
+      border-color: #334155;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+    }
+    .pagination .page-item.disabled .page-link {
+      background-color: #0d1219;
+      border-color: #1a222f;
+      color: #475569;
+    }
+
+    /* Rodapé Dark Neon */
+    .footer-bar {
+      margin-top: auto;
+      border-top: 1px solid #1a2942;
+      background-color: #0b1119;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Botão Neon */
+    .btn-neon-blue {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(13, 110, 253, 0.4);
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-neon-blue:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+      box-shadow: 0 0 18px rgba(13, 110, 253, 0.65);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+<!-- Topbar / Navbar Minimalista Dark Neon -->
+<header class="navbar navbar-expand-lg navbar-custom shadow-sm sticky-top py-2">
+<div class="container-fluid px-3 px-lg-4">
+<div class="d-flex align-items-center gap-3">
+<div class="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center shadow" style="width: 40px; height: 40px; box-shadow: 0 0 12px rgba(13, 110, 253, 0.5) !important;">
+<i class="bi bi-boxes fs-5"></i>
+</div>
+<div>
+<div class="d-flex align-items-center gap-2">
+<span class="fs-5 fw-bold text-white tracking-tight">Controle de Materiais de Consumo</span>
+<span class="badge navbar-brand-badge rounded-pill px-2 py-1">Almoxarifado</span>
+</div>
+<small class="text-secondary d-none d-sm-block" style="color: #8da2be !important;">Gráfica EPA — Gestão de Suprimentos &amp; Matérias-Primas</small>
+</div>
+</div>
+<div class="d-flex align-items-center gap-3">
+<!-- Indicador de Status do Sistema -->
+<div class="d-none d-md-flex align-items-center gap-2 rounded-pill px-3 py-1" style="background-color: rgba(25, 135, 84, 0.12); border: 1px solid rgba(25, 135, 84, 0.3);">
+<span class="spinner-grow spinner-grow-sm text-success" role="status" style="width: 0.55rem; height: 0.55rem;"></span>
+<span class="text-success small fw-semibold">Sincronizado</span>
+</div>
+<!-- Botão Voltar ao Menu -->
+<a class="btn btn-outline-secondary btn-sm px-3 py-1 d-inline-flex align-items-center gap-2 fw-medium rounded-2" href="#" style="border-color: #2a3a52; color: #a9b9cf;">
+<i class="bi bi-arrow-left"></i>
+<span class="">Voltar ao Menu</span>
+</a>
+</div>
+</div>
+</header>
+<!-- Conteúdo Principal -->
+<main class="container-fluid px-3 px-lg-4 py-4">
+<!-- Breadcrumb e Metadados do Módulo -->
+<div class="row align-items-center mb-3">
+<div class="col-md-8">
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-1 small">
+<li class="breadcrumb-item"><a class="text-decoration-none text-secondary" href="#">Início</a></li>
+<li class="breadcrumb-item"><a class="text-decoration-none text-secondary" href="#">Estoque &amp; Almoxarifado</a></li>
+<li aria-current="page" class="breadcrumb-item active text-primary fw-medium" style="color: #79b5ff !important;">Materiais de Consumo</li>
+</ol>
+</nav>
+<h1 class="h4 fw-bold text-white mb-0">Gestão de Materiais e Insumos Industriais</h1>
+</div>
+<div class="col-md-4 text-md-end mt-2 mt-md-0">
+<span class="text-secondary small me-2"><i class="bi bi-clock-history me-1"></i>Última atualização:</span>
+<span class="badge border font-monospace fw-semibold" style="background-color: #11161d; border-color: #1e293b !important; color: #79b5ff;">Hoje, 14:35</span>
+</div>
+</div>
+<!-- Alerta de Erro Simulado da API (Tratamento HTTP 500 do Back-end no tema escuro) -->
+<div class="alert alert-dismissible fade show rounded-3 d-flex align-items-start gap-3 mb-4" role="alert" style="background-color: rgba(147, 0, 10, 0.25); border: 1px solid rgba(255, 180, 171, 0.3); color: #ffdad6;">
+<i class="bi bi-exclamation-triangle-fill fs-4 flex-shrink-0 mt-1" style="color: #ffb4ab;"></i>
+<div class="flex-grow-1">
+<div class="d-flex align-items-center gap-2">
+<strong class="fw-bold" style="color: #ffffff;">Atenção do Sistema:</strong>
+<span class="badge" style="font-size: 0.7rem; background-color: rgba(255, 180, 171, 0.15); border: 1px solid rgba(255, 180, 171, 0.35); color: #ffb4ab;">Falha HTTP 500</span>
+</div>
+<p class="mb-0 mt-1 small" style="color: #ffdad6;">
+          Erro interno ao listar os materiais. Falha transitória de comunicação com o servidor de banco de dados do almoxarifado. Tente novamente ou contate o suporte.
+        </p>
+</div>
+<button aria-label="Fechar" class="btn-close btn-close-white" data-bs-dismiss="alert" type="button"></button>
+</div>
+<!-- Grid Principal Dividido em 2 Colunas Responsivas -->
+<div class="row g-4">
+<!-- Coluna da Esquerda: Formulário de Cadastro -->
+<div class="col-12 col-lg-4 col-xl-4">
+<div class="card card-neon rounded-3 h-100">
+<div class="card-header card-header-dark py-3 px-3 px-sm-4">
+<div class="d-flex align-items-center gap-2">
+<i class="bi bi-plus-circle text-primary fs-5" style="color: #79b5ff !important;"></i>
+<h2 class="h5 fw-bold text-white mb-0">Cadastrar Novo Material</h2>
+</div>
+<small class="text-secondary" style="color: #8da2be !important;">Adicione insumos para controle de estoque e reposição</small>
+</div>
+<div class="card-body p-3 p-sm-4">
+<form onsubmit="event.preventDefault();">
+<!-- Campo: Nome do Material -->
+<div class="mb-3">
+<label class="form-label" for="materialName">
+                  Nome do Material <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text border-end-0">
+<i class="bi bi-box-seam text-secondary"></i>
+</span>
+<input class="form-control border-start-0 ps-1" id="materialName" placeholder="Ex: Polímero PP Granulado" required="" type="text">
+</div>
+<div class="form-text text-secondary small">Identificação técnica oficial ou comercial do item.</div>
+</div>
+<!-- Campo: Tipo/Categoria -->
+<div class="mb-3">
+<label class="form-label" for="materialCategory">
+                  Tipo / Categoria <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text border-end-0">
+<i class="bi bi-tag text-secondary"></i>
+</span>
+<select class="form-select border-start-0 ps-1" id="materialCategory" required="">
+<option disabled="" selected="" value="">Selecione a categoria...</option>
+<option value="Plástico">Plástico</option>
+<option value="Metal">Metal</option>
+<option value="Químico">Químico</option>
+<option value="Papel">Papel e Celulose</option>
+<option value="Tinta">Tinta e Verniz</option>
+</select>
+</div>
+<div class="form-text text-secondary small">Classificação para alocação no depósito.</div>
+</div>
+<!-- Campo: Unidade de Medida -->
+<div class="mb-4">
+<label class="form-label" for="materialUnit">
+                  Unidade de Medida <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text border-end-0">
+<i class="bi bi-speedometer2 text-secondary"></i>
+</span>
+<select class="form-select border-start-0 ps-1" id="materialUnit" required="">
+<option disabled="" selected="" value="">Selecione a unidade...</option>
+<option value="kg">kg (Quilograma)</option>
+<option value="un">un (Unidade)</option>
+<option value="litros">litros (Litro)</option>
+<option value="m">m (Metro)</option>
+<option value="cx">cx (Caixa)</option>
+</select>
+</div>
+<div class="form-text text-secondary small">Padrão utilizado na contagem e requisição física.</div>
+</div>
+<!-- Botão Azul de Destaque Neon -->
+<div class="d-grid pt-2">
+<button class="btn btn-neon-blue py-2 px-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 rounded-2" type="submit">
+<i class="bi bi-check2-circle fs-5"></i>
+<span class="">Adicionar Material</span>
+</button>
+</div>
+<div class="mt-3 text-center">
+<small class="text-secondary d-flex align-items-center justify-content-center gap-1">
+<i class="bi bi-shield-check text-success"></i> Validação automática de duplicidade de código
+                </small>
+</div>
+</form>
+</div>
+</div>
+</div>
+<!-- Coluna da Direita: Tabela de Almoxarifado -->
+<div class="col-12 col-lg-8 col-xl-8">
+<div class="card card-neon rounded-3 h-100">
+<div class="card-header card-header-dark py-3 px-3 px-sm-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+<div>
+<div class="d-flex align-items-center gap-2">
+<i class="bi bi-clipboard-data text-primary fs-5" style="color: #79b5ff !important;"></i>
+<h2 class="h5 fw-bold text-white mb-0">Almoxarifado / Insumos Cadastrados</h2>
+</div>
+<small class="text-secondary" style="color: #8da2be !important;">Registro consolidado de matérias-primas e disponibilidade</small>
+</div>
+<!-- Filtro rápido / Busca -->
+<div class="d-flex align-items-center gap-2">
+<div class="input-group input-group-sm" style="max-width: 220px;">
+<span class="input-group-text border-end-0">
+<i class="bi bi-search text-secondary"></i>
+</span>
+<input class="form-control border-start-0 ps-1" placeholder="Buscar material..." type="text">
+</div>
+<button class="btn btn-sm btn-outline-secondary" style="border-color: #1e293b; color: #8da2be;" title="Atualizar listagem">
+<i class="bi bi-arrow-clockwise"></i>
+</button>
+</div>
+</div>
+<div class="card-body p-0 d-flex flex-column justify-content-between">
+<!-- Tabela com Dados Fictícios Realistas -->
+<div class="table-responsive">
+<table class="table table-hover align-middle mb-0">
+<thead>
+<tr>
+<th class="ps-4" scope="col" style="width: 100px;">ID Material</th>
+<th scope="col" class="">Nome do Material</th>
+<th scope="col" class="">Categoria</th>
+<th scope="col" class="">Estoque Atual</th>
+<th scope="col" class="">Status</th>
+<th class="text-end pe-4" scope="col" style="width: 110px;">Ações</th>
+</tr>
+</thead>
+<tbody>
+<!-- Linha 1: Polímero PP -->
+<tr>
+<td class="ps-4">
+<span class="badge border font-monospace fw-semibold" style="background-color: #0e141d; color: #94a3b8; border-color: #1e293b !important;">MAT-001</span>
+</td>
+<td class="">
+<div class="fw-semibold text-white">Polímero PP</div>
+<small class="text-secondary" style="color: #7d8ea5 !important;">Polipropileno granulado injetável alta fluidez</small>
+</td>
+<td class="">
+<span class="badge badge-category rounded-pill" style="background-color: rgba(13, 110, 253, 0.15); color: #79b5ff; border: 1px solid rgba(13, 110, 253, 0.35);">
+<i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Plástico
+                      </span>
+</td>
+<td class="">
+<span class="fw-bold text-white">250 kg</span>
+</td>
+<td class="">
+<span class="badge rounded-pill px-2 py-1" style="background-color: rgba(25, 135, 84, 0.15); color: #4ade80; border: 1px solid rgba(25, 135, 84, 0.35);">
+<i class="bi bi-check-circle me-1"></i>Regular
+                      </span>
+</td>
+<td class="text-end pe-4">
+<div class="btn-group btn-group-sm">
+<button class="btn btn-outline-secondary btn-sm" style="border-color: #1e293b; color: #94a3b8;" title="Editar" type="button">
+<i class="bi bi-pencil"></i>
+</button>
+<button class="btn btn-outline-danger btn-sm" style="border-color: rgba(220, 53, 69, 0.35);" title="Remover" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>
+</tr>
+<!-- Linha 2: Chapa de Aço Inox (Metal) -->
+<tr>
+<td class="ps-4">
+<span class="badge border font-monospace fw-semibold" style="background-color: #0e141d; color: #94a3b8; border-color: #1e293b !important;">MAT-002</span>
+</td>
+<td class="">
+<div class="fw-semibold text-white">Chapa de Alumínio Offset</div>
+<small class="text-secondary" style="color: #7d8ea5 !important;">Espessura 0.30mm matriz plana para rotativa</small>
+</td>
+<td class="">
+<span class="badge badge-category rounded-pill" style="background-color: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.35);">
+<i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Metal
+                      </span>
+</td>
+<td class="">
+<span class="fw-bold text-white">1.200 un</span>
+</td>
+<td class="">
+<span class="badge rounded-pill px-2 py-1" style="background-color: rgba(25, 135, 84, 0.15); color: #4ade80; border: 1px solid rgba(25, 135, 84, 0.35);">
+<i class="bi bi-check-circle me-1"></i>Regular
+                      </span>
+</td>
+<td class="text-end pe-4">
+<div class="btn-group btn-group-sm">
+<button class="btn btn-outline-secondary btn-sm" style="border-color: #1e293b; color: #94a3b8;" title="Editar" type="button">
+<i class="bi bi-pencil"></i>
+</button>
+<button class="btn btn-outline-danger btn-sm" style="border-color: rgba(220, 53, 69, 0.35);" title="Remover" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>
+</tr>
+<!-- Linha 3: Solvente / Químico -->
+<tr>
+<td class="ps-4">
+<span class="badge border font-monospace fw-semibold" style="background-color: #0e141d; color: #94a3b8; border-color: #1e293b !important;">MAT-003</span>
+</td>
+<td class="">
+<div class="fw-semibold text-white">Solvente Isopropílico Industrial</div>
+<small class="text-secondary" style="color: #7d8ea5 !important;">Limpeza de rolaria e matrizes químicas</small>
+</td>
+<td class="">
+<span class="badge badge-category rounded-pill" style="background-color: rgba(0, 180, 216, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);">
+<i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Químico
+                      </span>
+</td>
+<td class="">
+<span class="fw-bold" style="color: #ff6b6b;">45 litros</span>
+</td>
+<td class="">
+<span class="badge rounded-pill px-2 py-1" style="background-color: rgba(13, 110, 253, 0.15); color: rgb(110, 168, 254); border: 1px solid rgba(13, 110, 253, 0.4);">
+<i class="bi bi-exclamation-circle me-1"></i>Estoque Baixo
+                      </span>
+</td>
+<td class="text-end pe-4">
+<div class="btn-group btn-group-sm">
+<button class="btn btn-outline-secondary btn-sm" style="border-color: #1e293b; color: #94a3b8;" title="Editar" type="button">
+<i class="bi bi-pencil"></i>
+</button>
+<button class="btn btn-outline-danger btn-sm" style="border-color: rgba(220, 53, 69, 0.35);" title="Remover" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>
+</tr>
+<!-- Linha 4: Resina Epóxi / Verniz UV -->
+<tr>
+<td class="ps-4">
+<span class="badge border font-monospace fw-semibold" style="background-color: #0e141d; color: #94a3b8; border-color: #1e293b !important;">MAT-004</span>
+</td>
+<td class="">
+<div class="fw-semibold text-white">Verniz UV Alto Brilho</div>
+<small class="text-secondary" style="color: #7d8ea5 !important;">Acabamento superficial cura ultravioleta</small>
+</td>
+<td class="">
+<span class="badge badge-category rounded-pill" style="background-color: rgba(0, 180, 216, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);">
+<i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Químico
+                      </span>
+</td>
+<td class="">
+<span class="fw-bold text-white">380 litros</span>
+</td>
+<td class="">
+<span class="badge rounded-pill px-2 py-1" style="background-color: rgba(25, 135, 84, 0.15); color: #4ade80; border: 1px solid rgba(25, 135, 84, 0.35);">
+<i class="bi bi-check-circle me-1"></i>Regular
+                      </span>
+</td>
+<td class="text-end pe-4">
+<div class="btn-group btn-group-sm">
+<button class="btn btn-outline-secondary btn-sm" style="border-color: #1e293b; color: #94a3b8;" title="Editar" type="button">
+<i class="bi bi-pencil"></i>
+</button>
+<button class="btn btn-outline-danger btn-sm" style="border-color: rgba(220, 53, 69, 0.35);" title="Remover" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Rodapé da Tabela: Paginação do Bootstrap -->
+<div class="p-3 px-sm-4 border-top d-flex flex-wrap align-items-center justify-content-between gap-3" style="background-color: #0e131b; border-color: #1e293b !important;">
+<div class="small" style="color: #8da2be;">
+                Exibindo <span class="fw-bold text-white">1</span> a <span class="fw-bold text-white">4</span> de <span class="fw-bold text-white">18</span> itens cadastrados
+              </div>
+<nav aria-label="Paginação de Materiais">
+<ul class="pagination pagination-sm mb-0">
+<li class="page-item disabled">
+<a aria-disabled="true" class="page-link" href="#" tabindex="-1">
+<i class="bi bi-chevron-left me-1"></i>Anterior
+                    </a>
+</li>
+<li aria-current="page" class="page-item active">
+<a class="page-link" href="#">1</a>
+</li>
+<li class="page-item"><a class="page-link" href="#">2</a></li>
+<li class="page-item"><a class="page-link" href="#">3</a></li>
+<li class="page-item">
+<a class="page-link" href="#">
+                      Próximo<i class="bi bi-chevron-right ms-1"></i>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Rodapé Institucional Dark Neon -->
+<footer class="footer-bar py-3 px-3 px-lg-4">
+<div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+<div class="">
+<strong class="text-white">Gráfica EPA Ltda</strong> © 2024 — Sistema Integrado de PCP &amp; Almoxarifado Industrial.
+      </div>
+<div class="d-flex align-items-center gap-3">
+<span class=""><i class="bi bi-hdd-network text-success me-1"></i>Servidor Interno Ativo</span>
+<span class="text-secondary">•</span>
+<span class="">Suporte Almoxarifado: <strong class="text-white">ramal 4015</strong></span>
+</div>
+</div>
+</footer>
+<!-- Bootstrap 5.3.3 Bundle JS via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body></html>

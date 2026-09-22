@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+
+<html data-bs-theme="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Painel Analítico de Produção — Gráfica EPA</title>
+<!-- Bootstrap 5.3 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --font-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --color-primary: #0d6efd;
+      --color-neon-blue: #00d2ff;
+      --color-surface-bg: #080a0d;
+      --color-card-bg: #10141d;
+      --color-card-border: #1e293b;
+    }
+
+    body {
+      font-family: var(--font-base);
+      background-color: var(--color-surface-bg) !important;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar Estilo SCREEN_5 & SCREEN_9 */
+    .custom-navbar {
+      background: #0b1a2e !important;
+      border-bottom: 1px solid #1e293b !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .navbar-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+      box-shadow: 0 0 14px rgba(0, 210, 255, 0.45);
+      color: #fff;
+    }
+
+    /* Cards Dark Industrial com Neon Glow no Hover */
+    .card-dark-industrial, .stat-kpi-card {
+      background-color: var(--color-card-bg) !important;
+      border: 1px solid var(--color-card-border) !important;
+      border-radius: 0.75rem;
+      transition: all 0.25s ease-in-out;
+    }
+    .card-dark-industrial:hover, .stat-kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: #00d2ff !important;
+      box-shadow: 0 0 18px rgba(13, 110, 253, 0.45), 0 0 8px rgba(56, 189, 248, 0.6) !important;
+    }
+
+    .kpi-icon-box {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+    }
+
+    .metric-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 290px;
+      width: 100%;
+    }
+
+    .badge-mono {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    /* Inputs e Controles Dark Neon */
+    .input-dark, .form-control {
+      background-color: #0c1017 !important;
+      border-color: #243044 !important;
+      color: #f1f5f9 !important;
+    }
+    .input-dark:focus, .form-control:focus {
+      background-color: #101520 !important;
+      border-color: #00d2ff !important;
+      box-shadow: 0 0 12px rgba(0, 210, 255, 0.35) !important;
+      color: #ffffff !important;
+    }
+    .input-group-text {
+      background-color: #141a24 !important;
+      border-color: #243044 !important;
+      color: #94a3b8 !important;
+    }
+
+    /* Tabelas Dark */
+    .table-dark-custom {
+      --bs-table-bg: transparent;
+      --bs-table-hover-bg: #161e2b;
+      color: #e2e8f0;
+    }
+    .table-dark-custom thead th {
+      background-color: #141b27 !important;
+      color: #94a3b8 !important;
+      border-color: #243044 !important;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .table-dark-custom tbody td {
+      border-color: #1e293b !important;
+      padding: 12px 14px;
+      vertical-align: middle;
+    }
+
+    /* Rodapé Dark */
+    footer.footer-dark-custom {
+      margin-top: auto;
+      background-color: #080b0f;
+      border-top: 1px solid #1e293b;
+    }
+  </style>
+</head>
+<body class="d-flex flex-column">
+<!-- Top Navbar -->
+<header class="sticky-top">
+<nav class="navbar navbar-expand-lg navbar-dark custom-navbar py-2 px-3 shadow-sm">
+<div class="container-fluid px-lg-4">
+<!-- Brand / Title -->
+<a class="navbar-brand d-flex align-items-center gap-3 py-1 text-decoration-none" href="#">
+<div class="navbar-brand-badge">
+<i class="bi bi-printer-fill fs-5"></i>
+</div>
+<div class="d-flex flex-column leading-tight">
+<div class="d-flex align-items-center gap-2">
+<span class="fw-bold fs-5 tracking-wide text-white">Gráfica EPA</span>
+<span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-50 rounded-pill font-monospace" style="font-size: 0.65rem;">v2.4 Prod</span>
+</div>
+<span class="text-secondary small" style="font-size: 0.74rem;">Gestão Industrial &amp; Painel de Controle</span>
+</div>
+</a>
+<!-- Right Side Nav Actions -->
+<div class="d-flex align-items-center gap-3 ms-auto">
+<!-- System Status Badge -->
+<div class="d-none d-md-flex align-items-center gap-2 bg-black bg-opacity-40 px-3 py-1 rounded-pill text-secondary border border-secondary border-opacity-25">
+<span class="spinner-grow spinner-grow-sm text-success" role="status" style="width: 8px; height: 8px;"></span>
+<span class="small text-light" style="font-size: 0.78rem;">Sincronização em Tempo Real</span>
+</div>
+<!-- Quick Navigation buttons -->
+<a class="btn btn-outline-info btn-sm d-inline-flex align-items-center gap-2 px-3 py-1 text-nowrap rounded-2 border-opacity-50" href="#" style="box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);">
+<i class="bi bi-arrow-left-circle"></i>
+<span class="d-none d-sm-inline">Voltar ao Dashboard</span>
+</a>
+<a class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1 px-3 py-1 rounded-2" href="#">
+<i class="bi bi-box-arrow-right"></i>
+<span class="d-none d-sm-inline">Sair</span>
+</a>
+</div>
+</div>
+</nav>
+</header>
+<!-- Main Container -->
+<main class="container-fluid px-3 px-lg-4 py-4 flex-grow-1">
+<!-- Page Header & Breadcrumb -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
+<div>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-1 small text-secondary" style="font-size: 0.85rem;">
+<li class="breadcrumb-item"><a class="text-decoration-none text-secondary" href="#">Início</a></li>
+<li class="breadcrumb-item"><a class="text-decoration-none text-secondary" href="#">Indicadores</a></li>
+<li aria-current="page" class="breadcrumb-item active text-info fw-medium">Painel Analítico</li>
+</ol>
+</nav>
+<h1 class="h4 mb-0 fw-bold text-white d-flex align-items-center gap-2">
+<i class="bi bi-sliders text-primary"></i>
+          Indicadores Industriais &amp; Controle de OS
+        </h1>
+<p class="text-secondary small mb-0">Métricas consolidadas de rodagem por equipe e arquivamento de ordens técnicas</p>
+</div>
+<div class="d-flex align-items-center gap-2">
+<span class="badge card-dark-industrial text-secondary border border-secondary border-opacity-25 px-3 py-2 d-flex align-items-center gap-2">
+<i class="bi bi-calendar3 text-info"></i>
+<span class="text-light">Período Atual: <strong class="text-white">Semana 43</strong></span>
+</span>
+<button class="btn btn-sm btn-outline-secondary card-dark-industrial text-light border-secondary border-opacity-50 d-flex align-items-center gap-1" onclick="window.location.reload();">
+<i class="bi bi-arrow-clockwise text-info"></i>
+<span>Atualizar</span>
+</button>
+</div>
+</div>
+<!-- LINHA 1: Bloco de Indicadores Rápidos (KPI Cards) -->
+<section aria-label="Indicadores Rápidos" class="mb-4">
+<div class="row g-3">
+<!-- KPI 1: Tempo Total de Rodagem -->
+<div class="col-12 col-md-6 col-xl-3">
+<div class="card stat-kpi-card h-100 p-3 shadow-sm">
+<div class="d-flex align-items-center justify-content-between mb-2">
+<span class="text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Tempo Total de Rodagem</span>
+<div class="kpi-icon-box bg-primary bg-opacity-20 text-info">
+<i class="bi bi-clock-history fs-4"></i>
+</div>
+</div>
+<div class="d-flex align-items-baseline gap-2">
+<span class="metric-value fs-2 text-white">142h 35min</span>
+</div>
+<div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between small">
+<span class="text-success fw-medium d-flex align-items-center gap-1">
+<i class="bi bi-graph-up"></i> +8.4% vs semana anterior
+              </span>
+<span class="badge bg-black bg-opacity-50 text-secondary border border-secondary border-opacity-25 badge-mono">Máq. Offset #01</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: Total de Minutos Operacionais -->
+<div class="col-12 col-md-6 col-xl-3">
+<div class="card stat-kpi-card h-100 p-3 shadow-sm">
+<div class="d-flex align-items-center justify-content-between mb-2">
+<span class="text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Minutos Operacionais</span>
+<div class="kpi-icon-box bg-info bg-opacity-20 text-info">
+<i class="bi bi-stopwatch fs-4"></i>
+</div>
+</div>
+<div class="d-flex align-items-baseline gap-2">
+<span class="metric-value fs-2 text-white">8555 min</span>
+</div>
+<div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between small">
+<span class="text-info fw-medium d-flex align-items-center gap-1">
+<i class="bi bi-check2-all"></i> 98.2% disponibilidade
+              </span>
+<span class="badge bg-black bg-opacity-50 text-secondary border border-secondary border-opacity-25 badge-mono">3 Turnos</span>
+</div>
+</div>
+</div>
+<!-- KPI 3 Adicional: Eficiência Média Fabril -->
+<div class="col-12 col-md-6 col-xl-3">
+<div class="card stat-kpi-card h-100 p-3 shadow-sm">
+<div class="d-flex align-items-center justify-content-between mb-2">
+<span class="text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Eficiência Global (OEE)</span>
+<div class="kpi-icon-box bg-success bg-opacity-20 text-success">
+<i class="bi bi-speedometer2 fs-4"></i>
+</div>
+</div>
+<div class="d-flex align-items-baseline gap-2">
+<span class="metric-value fs-2 text-white">94.8%</span>
+</div>
+<div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between small">
+<span class="text-secondary">Meta estabelecida: 92.0%</span>
+<span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-50">Meta Batida</span>
+</div>
+</div>
+</div>
+<!-- KPI 4 Adicional: Total de OS Processadas -->
+<div class="col-12 col-md-6 col-xl-3">
+<div class="card stat-kpi-card h-100 p-3 shadow-sm">
+<div class="d-flex align-items-center justify-content-between mb-2">
+<span class="text-secondary fw-semibold small text-uppercase" style="letter-spacing: 0.5px;">Ordens de Serviço (OS)</span>
+<div class="kpi-icon-box bg-warning bg-opacity-20 text-warning">
+<i class="bi bi-file-earmark-check fs-4"></i>
+</div>
+</div>
+<div class="d-flex align-items-baseline gap-2">
+<span class="metric-value fs-2 text-white">38 OS</span>
+</div>
+<div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between small">
+<span class="text-secondary">34 concluídas • 4 em corte</span>
+<span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-50">100% no prazo</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- LINHA 2: Gráficos de Produção por Equipe -->
+<section aria-label="Gráficos de Desempenho" class="mb-4">
+<div class="row g-4">
+<!-- Coluna Esquerda: Line Chart (Comparativo Diário por Equipe) -->
+<div class="col-12 col-lg-6">
+<div class="card card-dark-industrial h-100 shadow-sm">
+<div class="card-header bg-transparent border-bottom border-secondary border-opacity-25 py-3 px-4 d-flex justify-content-between align-items-center">
+<div>
+<h5 class="card-title fw-bold mb-0 text-white d-flex align-items-center gap-2">
+<i class="bi bi-graph-up text-info"></i>
+                  Comparativo Diário por Equipe
+                </h5>
+<small class="text-secondary">Horas de rodagem efetiva na última semana (Seg a Sáb)</small>
+</div>
+<div class="dropdown">
+<button class="btn btn-sm btn-outline-secondary border-secondary border-opacity-50 text-light dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                  Últimos 7 dias
+                </button>
+<ul class="dropdown-menu dropdown-menu-end shadow-sm" style="background-color: #141a24; border-color: #243044;">
+<li><a class="dropdown-item active text-white bg-primary" href="#">Últimos 7 dias</a></li>
+<li><a class="dropdown-item text-light" href="#">Últimos 14 dias</a></li>
+<li><a class="dropdown-item text-light" href="#">Mês atual</a></li>
+</ul>
+</div>
+</div>
+<div class="card-body p-4">
+<!-- Legendas customizadas e indicadores -->
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3 small">
+<span class="d-inline-flex align-items-center gap-1 fw-medium text-light">
+<span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background-color: #0d6efd; box-shadow: 0 0 6px #0d6efd;"></span>
+                  Equipe Alfa (Manhã)
+                </span>
+<span class="d-inline-flex align-items-center gap-1 fw-medium text-light">
+<span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background-color: #0dcaf0; box-shadow: 0 0 6px #0dcaf0;"></span>
+                  Equipe Beta (Tarde)
+                </span>
+<span class="d-inline-flex align-items-center gap-1 fw-medium text-light">
+<span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background-color: #ffc107; box-shadow: 0 0 6px #ffc107;"></span>
+                  Equipe Gama (Noite)
+                </span>
+</div>
+<!-- Canvas Chart.js -->
+<div class="chart-container">
+<canvas id="dailyLineChart"></canvas>
+</div>
+</div>
+<div class="card-footer bg-transparent border-top border-secondary border-opacity-25 py-2 px-4 d-flex justify-content-between align-items-center small text-secondary">
+<span><i class="bi bi-info-circle text-info me-1"></i>Pico de produção na Quinta-feira (Equipe Alfa: 10.5h)</span>
+<span class="badge bg-primary bg-opacity-20 text-info border border-info border-opacity-50">Atualizado há 12 min</span>
+</div>
+</div>
+</div>
+<!-- Coluna Direita: Bar Chart (Comparativo Mensal por Equipe) -->
+<div class="col-12 col-lg-6">
+<div class="card card-dark-industrial h-100 shadow-sm">
+<div class="card-header bg-transparent border-bottom border-secondary border-opacity-25 py-3 px-4 d-flex justify-content-between align-items-center">
+<div>
+<h5 class="card-title fw-bold mb-0 text-white d-flex align-items-center gap-2">
+<i class="bi bi-bar-chart-fill text-info"></i>
+                  Comparativo Mensal por Equipe
+                </h5>
+<small class="text-secondary">Total de tiragem industrial acumulada (milhares de un.)</small>
+</div>
+<div class="dropdown">
+<button class="btn btn-sm btn-outline-secondary border-secondary border-opacity-50 text-light dropdown-toggle" data-bs-toggle="dropdown" type="button">
+                  Ano 2024
+                </button>
+<ul class="dropdown-menu dropdown-menu-end shadow-sm" style="background-color: #141a24; border-color: #243044;">
+<li><a class="dropdown-item active text-white bg-primary" href="#">Ano 2024</a></li>
+<li><a class="dropdown-item text-light" href="#">Ano 2023</a></li>
+</ul>
+</div>
+</div>
+<div class="card-body p-4">
+<!-- Legendas customizadas e indicadores -->
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3 small">
+<span class="d-inline-flex align-items-center gap-1 fw-medium text-light">
+<span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background-color: #0d6efd; box-shadow: 0 0 6px #0d6efd;"></span>
+                  Equipe Alfa
+                </span>
+<span class="d-inline-flex align-items-center gap-1 fw-medium text-light">
+<span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background-color: #0dcaf0; box-shadow: 0 0 6px #0dcaf0;"></span>
+                  Equipe Beta
+                </span>
+<span class="d-inline-flex align-items-center gap-1 fw-medium text-light">
+<span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background-color: #ffc107; box-shadow: 0 0 6px #ffc107;"></span>
+                  Equipe Gama
+                </span>
+</div>
+<!-- Canvas Chart.js -->
+<div class="chart-container">
+<canvas id="monthlyBarChart"></canvas>
+</div>
+</div>
+<div class="card-footer bg-transparent border-top border-secondary border-opacity-25 py-2 px-4 d-flex justify-content-between align-items-center small text-secondary">
+<span><i class="bi bi-trophy text-warning me-1"></i>Líder em Setembro: <strong class="text-light">Equipe Alfa (240 mil un.)</strong></span>
+<span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-50">Crescimento +14%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- LINHA 3: Área de Documentação (Área de Upload da OS) -->
+<section aria-label="Upload de Ordem de Serviço" class="mb-4">
+<div class="card card-dark-industrial shadow-sm">
+<div class="card-header bg-transparent border-bottom border-secondary border-opacity-25 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div>
+<h5 class="card-title fw-bold mb-0 text-white d-flex align-items-center gap-2">
+<i class="bi bi-cloud-arrow-up-fill text-success"></i>
+              Upload de Ordem de Serviço (OS) do Produto
+            </h5>
+<small class="text-secondary">Vinculação técnica de fichas gráficas e especificações de tiragem</small>
+</div>
+<span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25">Formatos aceitos: PDF ou JPG • Máx. 25MB</span>
+</div>
+<div class="card-body p-4">
+<!-- Alerta de Sucesso Dark conforme SCREEN_5 / SCREEN_9 -->
+<div class="alert alert-dismissible fade show d-flex align-items-center gap-3 p-3 mb-4 rounded-3 border-0 border-start border-4 border-success text-white shadow-sm" role="alert" style="background-color: #0d281e; border-color: #10b981 !important;">
+<div class="rounded-circle bg-success bg-opacity-20 text-success p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; min-width: 36px;">
+<i class="bi bi-check2-circle fs-5"></i>
+</div>
+<div class="flex-grow-1">
+<h6 class="alert-heading fw-bold text-success mb-0">Documento enviado com sucesso!</h6>
+<div class="small text-secondary">
+                Salvo em: <code class="bg-black bg-opacity-50 text-info px-2 py-1 rounded font-monospace">uploads/produto_10_os.pdf</code> • Registrado sob protocolo <strong class="text-light">#DOC-2024-8994</strong>
+</div>
+</div>
+<button aria-label="Close" class="btn-close btn-close-white" data-bs-dismiss="alert" type="button"></button>
+</div>
+<!-- Formulário de Upload -->
+<form id="osUploadForm" onsubmit="event.preventDefault(); handleFormSubmit();">
+<div class="row g-4 align-items-end">
+<!-- Campo 1: ID do Produto (numérico estático preenchido) -->
+<div class="col-12 col-md-4 col-lg-3">
+<label class="form-label fw-semibold text-secondary small mb-1" for="productIdInput">
+<i class="bi bi-hash text-info"></i> ID do Produto <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text border-end-0">#</span>
+<input class="form-control input-dark fw-semibold border-start-0 ps-0" id="productIdInput" placeholder="Ex: 10" required="" type="number" value="10"/>
+</div>
+<div class="form-text text-secondary small" style="font-size: 0.75rem;">Ref. Produto: <em>Caixas Acopladas Cartão 300g</em></div>
+</div>
+<!-- Campo 2: Campo de Seleção de Arquivo Personalizado do Bootstrap -->
+<div class="col-12 col-md-8 col-lg-6">
+<label class="form-label fw-semibold text-secondary small mb-1" for="osFileInput">
+<i class="bi bi-file-earmark-arrow-up text-info"></i> Selecionar Arquivo de OS <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<input accept=".pdf,.jpg,.jpeg" class="form-control input-dark" id="osFileInput" type="file"/>
+<button class="btn btn-outline-secondary border-secondary border-opacity-50 text-secondary" onclick="document.getElementById('osFileInput').value = '';" type="button">
+<i class="bi bi-x-circle"></i> Limpar
+                  </button>
+</div>
+<div class="form-text text-secondary small" style="font-size: 0.75rem;">Selecione o arquivo da ordem (.pdf ou .jpg com especificações de prova)</div>
+</div>
+<!-- Campo 3: Botão verde de destaque para envio -->
+<div class="col-12 col-lg-3">
+<button class="btn btn-success w-100 py-2 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" style="box-shadow: 0 0 12px rgba(25, 135, 84, 0.4);" type="submit">
+<i class="bi bi-upload"></i>
+<span>Enviar Documento (PDF/JPG)</span>
+</button>
+</div>
+</div>
+</form>
+<!-- Tabela de Documentos Recentes já Vinculados -->
+<div class="mt-4 pt-4 border-top border-secondary border-opacity-25">
+<div class="d-flex justify-content-between align-items-center mb-3">
+<h6 class="fw-bold mb-0 text-white small text-uppercase" style="letter-spacing: 0.5px;">
+<i class="bi bi-archive text-info me-1"></i> Documentos Recentes na Fila de Impressão
+              </h6>
+<span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25">Total: 3 Arquivos</span>
+</div>
+<div class="table-responsive">
+<table class="table table-dark-custom align-middle mb-0 small">
+<thead>
+<tr>
+<th scope="col" style="width: 110px;">ID PRODUTO</th>
+<th scope="col">NOME DO ARQUIVO</th>
+<th scope="col">TIPO</th>
+<th scope="col">DATA DE UPLOAD</th>
+<th scope="col">TAMANHO</th>
+<th scope="col">STATUS</th>
+<th class="text-center" scope="col" style="width: 120px;">AÇÕES</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="badge bg-primary bg-opacity-20 text-info border border-info border-opacity-50 badge-mono">#10</span></td>
+<td class="fw-medium text-white"><i class="bi bi-file-earmark-pdf text-danger me-1"></i> produto_10_os.pdf</td>
+<td><span class="badge bg-dark border border-secondary border-opacity-25 text-secondary">PDF Técnico</span></td>
+<td class="text-secondary">Hoje, às 14:15</td>
+<td class="text-secondary">4.2 MB</td>
+<td><span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-50"><i class="bi bi-check-circle me-1"></i>Vinculado</span></td>
+<td class="text-center">
+<button class="btn btn-sm btn-outline-info py-0 px-2 border-opacity-50" title="Visualizar"><i class="bi bi-eye"></i></button>
+<button class="btn btn-sm btn-outline-secondary py-0 px-2 border-opacity-50 text-secondary" title="Download"><i class="bi bi-download"></i></button>
+</td>
+</tr>
+<tr>
+<td><span class="badge bg-primary bg-opacity-20 text-info border border-info border-opacity-50 badge-mono">#08</span></td>
+<td class="fw-medium text-white"><i class="bi bi-file-earmark-image text-info me-1"></i> cartucho_medicamento_v2.jpg</td>
+<td><span class="badge bg-dark border border-secondary border-opacity-25 text-secondary">JPG Alta Res.</span></td>
+<td class="text-secondary">Ontem, às 18:30</td>
+<td class="text-secondary">12.8 MB</td>
+<td><span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-50"><i class="bi bi-check-circle me-1"></i>Vinculado</span></td>
+<td class="text-center">
+<button class="btn btn-sm btn-outline-info py-0 px-2 border-opacity-50" title="Visualizar"><i class="bi bi-eye"></i></button>
+<button class="btn btn-sm btn-outline-secondary py-0 px-2 border-opacity-50 text-secondary" title="Download"><i class="bi bi-download"></i></button>
+</td>
+</tr>
+<tr>
+<td><span class="badge bg-primary bg-opacity-20 text-info border border-info border-opacity-50 badge-mono">#05</span></td>
+<td class="fw-medium text-white"><i class="bi bi-file-earmark-pdf text-danger me-1"></i> rotulos_adesivos_cerveja.pdf</td>
+<td><span class="badge bg-dark border border-secondary border-opacity-25 text-secondary">PDF Técnico</span></td>
+<td class="text-secondary">22/10/2024, às 09:40</td>
+<td class="text-secondary">2.1 MB</td>
+<td><span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25"><i class="bi bi-archive me-1"></i>Arquivado</span></td>
+<td class="text-center">
+<button class="btn btn-sm btn-outline-info py-0 px-2 border-opacity-50" title="Visualizar"><i class="bi bi-eye"></i></button>
+<button class="btn btn-sm btn-outline-secondary py-0 px-2 border-opacity-50 text-secondary" title="Download"><i class="bi bi-download"></i></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Corporativo Dark -->
+<footer class="footer-dark-custom py-3 px-4 text-center text-md-start small text-secondary">
+<div class="container-fluid d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+<div>
+<strong class="text-light">Gráfica EPA</strong> © 2024 — Sistema Integrado de PCP, Controle de Produção e Escalas Fabris.
+      </div>
+<div class="d-flex align-items-center gap-3">
+<span class="d-inline-flex align-items-center gap-1.5 text-success">
+<i class="bi bi-circle-fill text-success" style="font-size: 0.5rem;"></i>
+          Servidor Online (Linha A)
+        </span>
+<span class="text-secondary opacity-50">|</span>
+<span class="text-secondary">Suporte Técnico: ramal 4012</span>
+</div>
+</div>
+</footer>
+<!-- Bootstrap 5.3 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Chart.js via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Configurações e Inicialização dos Gráficos Dark Neon -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+      // Cores Dark Neon
+      const colors = {
+        alfa: '#0d6efd',       // Neon blue
+        alfaBg: 'rgba(13, 110, 253, 0.22)',
+        beta: '#0dcaf0',       // Cyan neon
+        betaBg: 'rgba(13, 202, 240, 0.22)',
+        gama: '#ffc107',       // Âmbar / Amarelo vibrante
+        gamaBg: 'rgba(255, 193, 7, 0.22)',
+        gridColor: 'rgba(255, 255, 255, 0.07)',
+        textColor: '#94a3b8'
+      };
+
+      // 1. Gráfico de Linhas (Line Chart) - Comparativo Diário por Equipe (Última semana: Seg a Sáb)
+      const lineCtx = document.getElementById('dailyLineChart').getContext('2d');
+      new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+          datasets: [
+            {
+              label: 'Equipe Alfa',
+              data: [7.5, 8.2, 8.0, 10.5, 9.0, 6.5],
+              borderColor: colors.alfa,
+              backgroundColor: colors.alfaBg,
+              borderWidth: 2.5,
+              tension: 0.35,
+              fill: true,
+              pointBackgroundColor: colors.alfa,
+              pointBorderColor: '#ffffff',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            },
+            {
+              label: 'Equipe Beta',
+              data: [6.8, 7.5, 7.2, 8.4, 8.8, 7.0],
+              borderColor: colors.beta,
+              backgroundColor: colors.betaBg,
+              borderWidth: 2.5,
+              tension: 0.35,
+              fill: true,
+              pointBackgroundColor: colors.beta,
+              pointBorderColor: '#ffffff',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            },
+            {
+              label: 'Equipe Gama',
+              data: [5.5, 6.0, 6.8, 7.2, 7.0, 5.0],
+              borderColor: colors.gama,
+              backgroundColor: colors.gamaBg,
+              borderWidth: 2.5,
+              tension: 0.35,
+              fill: true,
+              pointBackgroundColor: colors.gama,
+              pointBorderColor: '#ffffff',
+              pointRadius: 4,
+              pointHoverRadius: 6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: '#0b1624',
+              borderColor: '#1e293b',
+              borderWidth: 1,
+              titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+              bodyFont: { family: 'JetBrains Mono', size: 12 },
+              padding: 10,
+              cornerRadius: 6,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.dataset.label}: ${context.parsed.y} horas de rodagem`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: colors.gridColor
+              },
+              ticks: {
+                font: { family: 'Inter', size: 11 },
+                color: colors.textColor
+              }
+            },
+            y: {
+              beginAtZero: true,
+              max: 12,
+              grid: {
+                color: colors.gridColor
+              },
+              ticks: {
+                font: { family: 'JetBrains Mono', size: 11 },
+                color: colors.textColor,
+                callback: function(value) {
+                  return value + 'h';
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Gráfico de Barras (Bar Chart) - Comparativo Mensal por Equipe (Últimos 5 meses)
+      const barCtx = document.getElementById('monthlyBarChart').getContext('2d');
+      new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro'],
+          datasets: [
+            {
+              label: 'Equipe Alfa',
+              data: [185, 210, 195, 240, 225],
+              backgroundColor: colors.alfa,
+              borderRadius: 6,
+              borderSkipped: false
+            },
+            {
+              label: 'Equipe Beta',
+              data: [160, 175, 180, 205, 190],
+              backgroundColor: colors.beta,
+              borderRadius: 6,
+              borderSkipped: false
+            },
+            {
+              label: 'Equipe Gama',
+              data: [140, 150, 165, 170, 160],
+              backgroundColor: colors.gama,
+              borderRadius: 6,
+              borderSkipped: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: '#0b1624',
+              borderColor: '#1e293b',
+              borderWidth: 1,
+              titleFont: { family: 'Inter', size: 13, weight: 'bold' },
+              bodyFont: { family: 'JetBrains Mono', size: 12 },
+              padding: 10,
+              cornerRadius: 6,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.dataset.label}: ${context.parsed.y}.000 un.`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: { family: 'Inter', size: 11 },
+                color: colors.textColor
+              }
+            },
+            y: {
+              beginAtZero: true,
+              max: 280,
+              grid: {
+                color: colors.gridColor
+              },
+              ticks: {
+                font: { family: 'JetBrains Mono', size: 11 },
+                color: colors.textColor,
+                callback: function(value) {
+                  return value + 'k';
+                }
+              }
+            }
+          }
+        }
+      });
+    });
+
+    // Simulação visual de envio do formulário
+    function handleFormSubmit() {
+      const prodId = document.getElementById('productIdInput').value || '10';
+      const fileInput = document.getElementById('osFileInput');
+      const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : `produto_${prodId}_os.pdf`;
+
+      alert(`Simulação de Envio:\n\nOrdem de Serviço vinculada com sucesso!\n• ID do Produto: #${prodId}\n• Arquivo: ${fileName}\n• Destino: uploads/${fileName}`);
+    }
+  </script>
+</body></html>

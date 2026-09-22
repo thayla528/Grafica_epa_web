@@ -1,0 +1,852 @@
+<!DOCTYPE html><html data-bs-theme="dark" lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Controle de Estoque e Suprimentos — Gráfica EPA</title>
+<!-- Bootstrap 5.3 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+    :root {
+      --bg-dark-deep: #080a0d;
+      --bg-card: #11161d;
+      --bg-card-header: #141b24;
+      --border-dark: #222a36;
+      --navbar-bg: #0b1a2e;
+      --neon-blue: #0d6efd;
+      --neon-blue-glow: rgba(13, 110, 253, 0.45);
+      --input-bg: #141a22;
+      --text-muted-custom: #94a3b8;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-dark-deep);
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar Customization - Deep Industrial Blue */
+    .navbar-custom {
+      background-color: var(--navbar-bg) !important;
+      border-bottom: 1px solid #1c2b42;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .brand-logo-badge {
+      background: linear-gradient(135deg, #0d6efd, #004ecc);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 1.25rem;
+      box-shadow: 0 0 12px rgba(13, 110, 253, 0.5);
+    }
+
+    /* Status indicator neon */
+    .status-badge-sync {
+      background: rgba(25, 135, 84, 0.15);
+      color: #20c997;
+      border: 1px solid rgba(32, 201, 151, 0.35);
+      box-shadow: 0 0 8px rgba(32, 201, 151, 0.2);
+    }
+    .status-dot-pulse {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #20c997;
+      box-shadow: 0 0 8px #20c997;
+      margin-right: 5px;
+    }
+
+    /* Quick Metrics Pills Dark */
+    .metric-pill {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 0.5rem;
+      padding: 0.35rem 0.85rem;
+    }
+
+    /* Neon Hover on Industrial Cards */
+    .neon-card {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border-dark) !important;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease-in-out;
+    }
+    .neon-card:hover {
+      border-color: var(--neon-blue) !important;
+      box-shadow: 0 0 18px var(--neon-blue-glow), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .card-header-dark {
+      background-color: var(--bg-card-header) !important;
+      border-bottom: 1px solid var(--border-dark);
+      border-top-left-radius: 0.75rem !important;
+      border-top-right-radius: 0.75rem !important;
+      padding: 0.95rem 1.25rem;
+    }
+
+    /* Custom Nav Tabs Dark & Electric */
+    .nav-tabs-custom {
+      border-bottom: 1px solid var(--border-dark) !important;
+    }
+    .nav-tabs-custom .nav-link {
+      color: var(--text-muted-custom);
+      font-weight: 500;
+      padding: 0.75rem 1.35rem;
+      border: none;
+      border-bottom: 3px solid transparent;
+      border-radius: 0;
+      background: transparent;
+      transition: all 0.2s ease-in-out;
+    }
+    .nav-tabs-custom .nav-link:hover {
+      color: #b1c5ff;
+      border-bottom: 3px solid rgba(13, 110, 253, 0.4);
+    }
+    .nav-tabs-custom .nav-link.active {
+      color: #ffffff !important;
+      font-weight: 600;
+      background-color: transparent !important;
+      border-bottom: 3px solid #0d6efd !important;
+      text-shadow: 0 0 10px rgba(13, 110, 253, 0.6);
+    }
+
+    /* Form Controls Dark */
+    .form-label {
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.35rem;
+    }
+    .form-control, .form-select {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--border-dark) !important;
+      color: #f1f5f9 !important;
+      border-radius: 0.5rem;
+      font-size: 0.88rem;
+      padding: 0.55rem 0.75rem;
+    }
+    .form-control::placeholder {
+      color: #64748b !important;
+    }
+    .input-group-text {
+      background-color: #17202c !important;
+      border: 1px solid var(--border-dark) !important;
+      color: #94a3b8 !important;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #0d6efd !important;
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25), 0 0 12px rgba(13, 110, 253, 0.3) !important;
+    }
+
+    /* Dark Table Styles */
+    .table-dark-custom {
+      --bs-table-bg: transparent;
+      --bs-table-striped-bg: rgba(255, 255, 255, 0.02);
+      --bs-table-hover-bg: rgba(13, 110, 253, 0.07);
+      color: #cbd5e1;
+      border-color: var(--border-dark);
+    }
+    .table-dark-custom thead th {
+      background-color: #0f141c !important;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      border-bottom: 1px solid var(--border-dark) !important;
+      padding: 0.85rem 0.95rem;
+    }
+    .table-dark-custom tbody td {
+      border-bottom: 1px solid #1a222e;
+      padding: 0.85rem 0.95rem;
+      vertical-align: middle;
+      font-size: 0.875rem;
+    }
+
+    /* Badges Subtle Dark */
+    .badge-code-os {
+      background-color: rgba(13, 110, 253, 0.15);
+      color: #70a9ff;
+      border: 1px solid rgba(13, 110, 253, 0.35);
+      letter-spacing: 0.02em;
+    }
+    .badge-status-approved {
+      background-color: rgba(25, 135, 84, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .badge-status-warning {
+      background-color: rgba(234, 179, 8, 0.15);
+      color: #facc15;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+    .badge-status-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .badge-unit {
+      background-color: #17202d;
+      color: #94a3b8;
+      border: 1px solid #293547;
+    }
+
+    /* Pagination Dark */
+    .pagination .page-link {
+      background-color: var(--input-bg);
+      border-color: var(--border-dark);
+      color: #cbd5e1;
+      font-size: 0.8rem;
+    }
+    .pagination .page-link:hover {
+      background-color: #1e2836;
+      border-color: #0d6efd;
+      color: #ffffff;
+    }
+    .pagination .page-item.active .page-link {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+    }
+    .pagination .page-item.disabled .page-link {
+      background-color: #0d1218;
+      border-color: #1a222e;
+      color: #475569;
+    }
+
+    /* Buttons Neon Styling */
+    .btn-neon-primary {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(13, 110, 253, 0.4);
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-neon-primary:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+      box-shadow: 0 0 18px rgba(13, 110, 253, 0.65);
+      color: #ffffff;
+    }
+
+    /* Footer Dark */
+    footer {
+      margin-top: auto;
+      background-color: #07090d;
+      border-top: 1px solid #1a222e;
+      font-size: 0.825rem;
+      color: #8391a3;
+    }
+  </style>
+</head>
+<body>
+<!-- Top Navbar Industrial Dark Neon -->
+<header>
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+<div class="container-fluid px-4 py-2">
+<!-- Brand / Nome da Tela -->
+<a class="navbar-brand d-flex align-items-center gap-2 m-0 text-decoration-none" href="#">
+<div class="brand-logo-badge">
+<i class="bi bi-boxes"></i>
+</div>
+<div>
+<span class="fs-6 fw-bold text-light d-block lh-1">Controle de Estoque e Suprimentos</span>
+<small class="text-secondary" style="font-size: 0.75rem; color: #8ea3bf !important;">Gráfica EPA — Gestão Industrial &amp; Painel de Controle</small>
+</div>
+</a>
+<!-- Botões de Ação Rápida (Navbar) -->
+<div class="d-flex align-items-center gap-2">
+<div class="d-none d-md-flex align-items-center gap-2 me-3">
+<span class="badge status-badge-sync px-2.5 py-1.5 d-inline-flex align-items-center rounded-pill">
+<span class="status-dot-pulse"></span> Sincronizado
+            </span>
+</div>
+<button class="btn btn-outline-secondary btn-sm px-3 rounded-2 text-light border-secondary" onclick="alert('Redirecionando para o Dashboard...')" type="button">
+<i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+          </button>
+<button class="btn btn-outline-danger btn-sm px-3 rounded-2" onclick="confirm('Deseja realmente encerrar a sessão?')" type="button">
+<i class="bi bi-box-arrow-right me-1"></i> Sair
+          </button>
+</div>
+</div>
+</nav>
+</header>
+<!-- Conteúdo Principal -->
+<main class="container-fluid px-4 py-4 flex-grow-1">
+<!-- Breadcrumb e Título da Seção -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+<div>
+<nav aria-label="breadcrumb">
+<ol class="breadcrumb mb-1" style="font-size: 0.8rem;">
+<li class="breadcrumb-item"><a class="text-decoration-none text-secondary" href="#">Início</a></li>
+<li class="breadcrumb-item"><a class="text-decoration-none text-secondary" href="#">Operacional</a></li>
+<li aria-current="page" class="breadcrumb-item active text-primary fw-semibold">Estoque &amp; Catálogo</li>
+</ol>
+</nav>
+<h1 class="h4 fw-bold text-light m-0">Almoxarifado &amp; Fichas de Ordens de Serviço</h1>
+</div>
+<!-- Quick Metrics Pills Dark -->
+<div class="d-flex gap-2 mt-2 mt-md-0">
+<div class="metric-pill shadow-sm text-end">
+<span class="d-block text-secondary" style="font-size: 0.72rem;">TOTAL DE ITENS</span>
+<span class="fw-bold text-light" style="font-size: 0.9rem;">48 Cadastrados</span>
+</div>
+<div class="metric-pill shadow-sm text-end">
+<span class="d-block text-secondary" style="font-size: 0.72rem;">STATUS OPERACIONAL</span>
+<span class="badge badge-status-approved">Estoque Regular</span>
+</div>
+</div>
+</div>
+<!-- Alerta de Erro Simulado Dark -->
+<div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center gap-2 mb-4" role="alert" style="background-color: rgba(220, 53, 69, 0.12); border-color: rgba(220, 53, 69, 0.35); color: #fca5a5;">
+<i class="bi bi-exclamation-triangle-fill fs-5 text-danger flex-shrink-0"></i>
+<div class="">
+<strong class="text-white">Atenção do Sistema:</strong> Erro interno ao listar os produtos. Tente novamente.
+        <span class="d-block small" style="color: #fda4af;">Simulação de feedback do back-end (HTTP 500 — Falha transitória de sincronização).</span>
+</div>
+<button aria-label="Fechar" class="btn-close ms-auto btn-close-white" data-bs-dismiss="alert" type="button"></button>
+</div>
+<!-- Sistema de Abas do Bootstrap (nav-tabs) Dark -->
+<ul class="nav nav-tabs nav-tabs-custom mb-4" id="estoqueTab" role="tablist">
+<li class="nav-item" role="presentation">
+<button aria-controls="produtos-pane" aria-selected="true" class="nav-link active d-flex align-items-center gap-2" data-bs-target="#produtos-pane" data-bs-toggle="tab" id="produtos-tab" role="tab" type="button">
+<i class="bi bi-file-earmark-text text-primary"></i>
+          Produtos (Ordens de Serviço)
+          <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.7rem;">3 Recentes</span>
+</button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="materiais-pane" aria-selected="false" class="nav-link d-flex align-items-center gap-2" data-bs-target="#materiais-pane" data-bs-toggle="tab" id="materiais-tab" role="tab" type="button" tabindex="-1">
+<i class="bi bi-layers-half"></i>
+          Materiais Insumos
+          <span class="badge rounded-pill bg-secondary-subtle text-secondary border border-secondary-subtle ms-1" style="font-size: 0.7rem;">Almoxarifado</span>
+</button>
+</li>
+</ul>
+<!-- Conteúdo das Abas (Tab Panes) -->
+<div class="tab-content" id="estoqueTabContent">
+<!-- ================= ABA 1: PRODUTOS (ORDENS DE SERVIÇO) ================= -->
+<div aria-labelledby="produtos-tab" class="tab-pane fade show active" id="produtos-pane" role="tabpanel" tabindex="0">
+<div class="row g-4">
+<!-- Coluna Esquerda: Formulário de Cadastro de Produtos -->
+<div class="col-12 col-lg-4">
+<div class="card neon-card h-100">
+<div class="card-header card-header-dark d-flex align-items-center gap-2">
+<i class="bi bi-plus-circle text-primary fs-5"></i>
+<div>
+<h2 class="h6 fw-bold text-light m-0">Cadastrar Novo Produto</h2>
+<small class="text-secondary" style="font-size: 0.75rem;">Vincule o item à sua respectiva Ordem de Serviço</small>
+</div>
+</div>
+<div class="card-body p-4">
+<form id="formCadastrarProduto" onsubmit="event.preventDefault(); alert('Produto registrado com sucesso no catálogo!');">
+<!-- Nome do Produto -->
+<div class="mb-3">
+<label class="form-label" for="nomeProduto">
+                      Nome do Produto <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+<input class="form-control" id="nomeProduto" placeholder="Ex: Cartucho Farmacêutico 300g" required="" type="text">
+</div>
+<div class="form-text text-secondary" style="font-size: 0.75rem;">Identificação comercial para a linha de produção.</div>
+</div>
+<!-- Código da OS -->
+<div class="mb-3">
+<label class="form-label" for="codigoOS">
+                      Código da OS <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text"><i class="bi bi-hash"></i></span>
+<input class="form-control font-monospace" id="codigoOS" placeholder="Ex: OS-2024-8842" required="" type="text">
+</div>
+<div class="form-text text-secondary" style="font-size: 0.75rem;">Número do protocolo de aprovação gráfica.</div>
+</div>
+<!-- Categoria / Tipo de Acabamento -->
+<div class="mb-3">
+<label class="form-label" for="categoriaProduto">Linha Industrial</label>
+<select class="form-select" id="categoriaProduto">
+<option selected="" value="offset">Impressão Offset Plana</option>
+<option value="rotulo">Rótulos e Adesivos BOPP</option>
+<option value="editorial">Editorial &amp; Catálogos</option>
+<option value="embalagem">Embalagens Acopladas</option>
+</select>
+</div>
+<!-- Descrição do Produto -->
+<div class="mb-4">
+<label class="form-label" for="descricaoProduto">Descrição &amp; Especificações Técnicas</label>
+<textarea class="form-control" id="descricaoProduto" placeholder="Insira gramatura, faca especial, plastificação ou orientações de prova de cor..." rows="3"></textarea>
+</div>
+<!-- Botão de Ação Rápida com Neon Primary -->
+<button class="btn btn-neon-primary w-100 py-2 fw-medium shadow-sm d-flex align-items-center justify-content-center gap-2" type="submit">
+<i class="bi bi-check2-circle fs-5"></i>
+                    Cadastrar Produto
+                  </button>
+</form>
+</div>
+<div class="card-footer border-top py-2 px-3 text-secondary small d-flex align-items-center gap-1" style="background-color: #0e1218; border-color: var(--border-dark) !important;">
+<i class="bi bi-shield-check text-success"></i>
+                Validação automática de duplicidade de OS
+              </div>
+</div>
+</div>
+<!-- Coluna Direita: Tabela de Histórico de Produtos -->
+<div class="col-12 col-lg-8">
+<div class="card neon-card h-100 d-flex flex-column">
+<div class="card-header card-header-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
+<div class="d-flex align-items-center gap-2">
+<i class="bi bi-journal-text text-primary fs-5"></i>
+<div>
+<h2 class="h6 fw-bold text-light m-0">Produtos &amp; Ordens Registradas</h2>
+<small class="text-secondary" style="font-size: 0.75rem;">Histórico consolidado de ordens de serviço ativas</small>
+</div>
+</div>
+<!-- Ações e Filtro de Tabela -->
+<div class="d-flex align-items-center gap-2">
+<div class="input-group input-group-sm" style="max-width: 200px;">
+<span class="input-group-text"><i class="bi bi-search"></i></span>
+<input class="form-control" placeholder="Buscar por OS..." type="text">
+</div>
+<button class="btn btn-outline-secondary btn-sm text-light border-secondary" title="Recarregar dados">
+<i class="bi bi-arrow-clockwise"></i>
+</button>
+</div>
+</div>
+<div class="card-body p-0 flex-grow-1">
+<div class="table-responsive">
+<table class="table table-dark table-dark-custom table-hover align-middle mb-0">
+<thead>
+<tr>
+<th scope="col" style="width: 140px;" class="">CÓDIGO OS</th>
+<th scope="col" class="">NOME DO PRODUTO</th>
+<th scope="col" class="">ESPECIFICAÇÃO / DESCRIÇÃO</th>
+<th scope="col" style="width: 140px;" class="">STATUS</th>
+<th class="text-end" scope="col" style="width: 100px;">AÇÕES</th>
+</tr>
+</thead>
+<tbody>
+<!-- Linha 1 -->
+<tr>
+<td class="">
+<span class="badge badge-code-os font-monospace fw-bold px-2 py-1">OS-2024-8840</span>
+</td>
+<td class="">
+<div class="fw-bold text-light">Cartucho Farmacêutico 300g</div>
+<small class="text-secondary">Cliente: BioLabs Pharma S.A.</small>
+</td>
+<td class="">
+<span class="text-truncate d-inline-block text-secondary" style="max-width: 260px;" title="Cartão Tríplex 300g com verniz UV localizado e hot-stamping prata.">
+                            Cartão Tríplex 300g com verniz UV localizado e hot-stamping prata.
+                          </span>
+</td>
+<td class="">
+<span class="badge badge-status-approved d-inline-flex align-items-center gap-1 px-2 py-1">
+<i class="bi bi-check-circle-fill" style="font-size: 0.65rem;"></i> Aprovado
+                          </span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+<!-- Linha 2 -->
+<tr>
+<td class="">
+<span class="badge badge-code-os font-monospace fw-bold px-2 py-1">OS-2024-8841</span>
+</td>
+<td class="">
+<div class="fw-bold text-light">Rótulo Cerveja Artesanal IPA</div>
+<small class="text-secondary">Cliente: Cervejaria Aurora</small>
+</td>
+<td class="">
+<span class="text-truncate d-inline-block text-secondary" style="max-width: 260px;" title="BOPP Metalizado com laminação fosca em bobina de 500m.">
+                            BOPP Metalizado com laminação fosca em bobina de 500m.
+                          </span>
+</td>
+<td class="">
+<span class="badge bg-primary-subtle text-primary border border-primary-subtle d-inline-flex align-items-center gap-1 px-2 py-1"><i class="bi bi-hourglass-split" style="font-size: 0.65rem;"></i> Em Prova de Cor</span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+<!-- Linha 3 -->
+<tr>
+<td class="">
+<span class="badge badge-code-os font-monospace fw-bold px-2 py-1">OS-2024-8842</span>
+</td>
+<td class="">
+<div class="fw-bold text-light">Catálogo Institucional 48 Páginas</div>
+<small class="text-secondary">Cliente: Cooperativa AgroNorte</small>
+</td>
+<td class="">
+<span class="text-truncate d-inline-block text-secondary" style="max-width: 260px;" title="Capa Couché 250g Fosco + Miolo Couché 115g com dobra e grampo canoa.">
+                            Capa Couché 250g Fosco + Miolo Couché 115g com dobra e grampo canoa.
+                          </span>
+</td>
+<td class="">
+<span class="badge badge-status-approved d-inline-flex align-items-center gap-1 px-2 py-1">
+<i class="bi bi-check-circle-fill" style="font-size: 0.65rem;"></i> Aprovado
+                          </span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+<!-- Linha 4 -->
+<tr>
+<td class="">
+<span class="badge badge-code-os font-monospace fw-bold px-2 py-1">OS-2024-8843</span>
+</td>
+<td class="">
+<div class="fw-bold text-light">Caixa Acoplada Microondulado</div>
+<small class="text-secondary">Cliente: Indústrias EletroTec</small>
+</td>
+<td class="">
+<span class="text-truncate d-inline-block text-secondary" style="max-width: 260px;" title="Papel Cartão Duplex acoplado em onda E com faca vinco 4 cantos.">
+                            Papel Cartão Duplex acoplado em onda E com faca vinco 4 cantos.
+                          </span>
+</td>
+<td class="">
+<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle d-inline-flex align-items-center gap-1 px-2 py-1">
+<i class="bi bi-clock" style="font-size: 0.65rem;"></i> Aguardando Faca
+                          </span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Paginação Dark -->
+<div class="card-footer border-top py-3 d-flex flex-wrap justify-content-between align-items-center gap-2" style="background-color: #0e1218; border-color: var(--border-dark) !important;">
+<span class="text-secondary small">Exibindo <strong>1 a 4</strong> de <strong>28</strong> ordens registradas</span>
+<nav aria-label="Navegação de páginas de produtos">
+<ul class="pagination pagination-sm m-0">
+<li class="page-item disabled">
+<a aria-disabled="true" class="page-link" href="#" tabindex="-1">Anterior</a>
+</li>
+<li aria-current="page" class="page-item active">
+<a class="page-link" href="#">1</a>
+</li>
+<li class="page-item"><a class="page-link" href="#">2</a></li>
+<li class="page-item"><a class="page-link" href="#">3</a></li>
+<li class="page-item">
+<a class="page-link" href="#">Próximo</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= ABA 2: MATERIAIS INSUMOS ================= -->
+<div aria-labelledby="materiais-tab" class="tab-pane fade" id="materiais-pane" role="tabpanel" tabindex="0">
+<div class="row g-4">
+<!-- Coluna Esquerda: Formulário de Cadastro de Materiais -->
+<div class="col-12 col-lg-4">
+<div class="card neon-card h-100">
+<div class="card-header card-header-dark d-flex align-items-center gap-2">
+<i class="bi bi-box-arrow-in-down text-primary fs-5"></i>
+<div>
+<h2 class="h6 fw-bold text-light m-0">Cadastrar Novo Material</h2>
+<small class="text-secondary" style="font-size: 0.75rem;">Defina unidades e ponto de reposição do almoxarifado</small>
+</div>
+</div>
+<div class="card-body p-4">
+<form id="formCadastrarMaterial" onsubmit="event.preventDefault(); alert('Material insumo cadastrado com sucesso!');">
+<!-- Nome do Material -->
+<div class="mb-3">
+<label class="form-label" for="nomeMaterial">
+                      Nome do Material <span class="text-danger">*</span>
+</label>
+<div class="input-group">
+<span class="input-group-text"><i class="bi bi-tag"></i></span>
+<input class="form-control" id="nomeMaterial" placeholder="Ex: Papel Cartão Tríplex 300g" required="" type="text">
+</div>
+<div class="form-text text-secondary" style="font-size: 0.75rem;">Nome técnico do insumo conforme nota fiscal de entrada.</div>
+</div>
+<!-- Unidade de Medida e Quantidade Mínima (Grid 2 Colunas) -->
+<div class="row g-2 mb-3">
+<!-- Unidade de Medida -->
+<div class="col-6">
+<label class="form-label" for="unidadeMedida">
+                        Unidade (UN) <span class="text-danger">*</span>
+</label>
+<select class="form-select" id="unidadeMedida" required="">
+<option disabled="" value="">Selecione...</option>
+<option selected="" value="kg">kg (Quilograma)</option>
+<option value="un">un (Unidades / Folhas)</option>
+<option value="m">m (Metros / Bobinas)</option>
+<option value="l">L (Litros)</option>
+<option value="cx">cx (Caixas)</option>
+</select>
+</div>
+<!-- Quantidade Mínima -->
+<div class="col-6">
+<label class="form-label" for="quantidadeMinima">
+                        Qtd. Mínima <span class="text-danger">*</span>
+</label>
+<input class="form-control" id="quantidadeMinima" min="1" placeholder="Ex: 50" required="" step="any" type="number">
+</div>
+</div>
+<!-- Fornecedor / Fabricante Preferencial -->
+<div class="mb-3">
+<label class="form-label" for="fornecedorMaterial">Fornecedor Principal</label>
+<div class="input-group">
+<span class="input-group-text"><i class="bi bi-building"></i></span>
+<input class="form-control" id="fornecedorMaterial" placeholder="Ex: Klabin S.A. / Sun Chemical" type="text">
+</div>
+</div>
+<!-- Localização no Almoxarifado -->
+<div class="mb-4">
+<label class="form-label" for="localizacaoAlmoxarifado">Localização no Depósito</label>
+<input class="form-control" id="localizacaoAlmoxarifado" placeholder="Ex: Galpão A — Corredor 03 (Prateleira 12)" type="text">
+</div>
+<!-- Botão de Ação Rápida com Neon Primary -->
+<button class="btn btn-neon-primary w-100 py-2 fw-medium shadow-sm d-flex align-items-center justify-content-center gap-2" type="submit">
+<i class="bi bi-plus-lg fs-5"></i>
+                    Cadastrar Insumo
+                  </button>
+</form>
+</div>
+<div class="card-footer border-top py-2 px-3 text-secondary small d-flex align-items-center gap-1" style="background-color: #0e1218; border-color: var(--border-dark) !important;">
+<i class="bi bi-bell-fill text-warning"></i>
+                Dispara alerta de compra ao atingir a quantidade mínima
+              </div>
+</div>
+</div>
+<!-- Coluna Direita: Tabela de Materiais Insumos -->
+<div class="col-12 col-lg-8">
+<div class="card neon-card h-100 d-flex flex-column">
+<div class="card-header card-header-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
+<div class="d-flex align-items-center gap-2">
+<i class="bi bi-box-seam-fill text-primary fs-5"></i>
+<div>
+<h2 class="h6 fw-bold text-light m-0">Insumos em Estoque</h2>
+<small class="text-secondary" style="font-size: 0.75rem;">Controle quantitativo e limites de segurança</small>
+</div>
+</div>
+<!-- Ações e Filtro de Tabela -->
+<div class="d-flex align-items-center gap-2">
+<div class="input-group input-group-sm" style="max-width: 200px;">
+<span class="input-group-text"><i class="bi bi-search"></i></span>
+<input class="form-control" placeholder="Buscar material..." type="text">
+</div>
+<button class="btn btn-outline-secondary btn-sm text-light border-secondary" title="Exportar para CSV">
+<i class="bi bi-download"></i>
+</button>
+</div>
+</div>
+<div class="card-body p-0 flex-grow-1">
+<div class="table-responsive">
+<table class="table table-dark table-dark-custom table-hover align-middle mb-0">
+<thead>
+<tr>
+<th scope="col" class="">NOME DO MATERIAL</th>
+<th scope="col" style="width: 100px;" class="">UNIDADE</th>
+<th scope="col" style="width: 120px;" class="">QTD. MÍNIMA</th>
+<th scope="col" style="width: 130px;" class="">SALDO ATUAL</th>
+<th scope="col" style="width: 130px;" class="">ESTADO</th>
+<th class="text-end" scope="col" style="width: 100px;">AÇÕES</th>
+</tr>
+</thead>
+<tbody>
+<!-- Linha 1 -->
+<tr>
+<td class="">
+<div class="fw-bold text-light">Papel Cartão Tríplex 300g</div>
+<small class="text-secondary">Formato 66x96cm — Palete industrial</small>
+</td>
+<td class="">
+<span class="badge badge-unit font-monospace">un</span>
+</td>
+<td class="">
+<span class="fw-semibold text-secondary">5.000 un</span>
+</td>
+<td class="">
+<span class="fw-bold text-success">14.200 un</span>
+</td>
+<td class="">
+<span class="badge badge-status-approved d-inline-flex align-items-center gap-1 px-2 py-1">
+<i class="bi bi-check-circle-fill" style="font-size: 0.65rem;"></i> Confortável
+                          </span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+<!-- Linha 2 -->
+<tr>
+<td class="">
+<div class="fw-bold text-light">Tinta Offset Escala Europa Cyan</div>
+<small class="text-secondary">Lata 2.5kg — Série Alta Pigmentação</small>
+</td>
+<td class="">
+<span class="badge badge-unit font-monospace">kg</span>
+</td>
+<td class="">
+<span class="fw-semibold text-secondary">30 kg</span>
+</td>
+<td class="">
+<span class="fw-bold text-warning">32 kg</span>
+</td>
+<td class="">
+<span class="badge bg-primary-subtle text-primary border border-primary-subtle d-inline-flex align-items-center gap-1 px-2 py-1"><i class="bi bi-hourglass-split" style="font-size: 0.65rem;"></i> Em Prova de Cor</span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+<!-- Linha 3 -->
+<tr>
+<td class="">
+<div class="fw-bold text-light">Filme BOPP Brilho Térmico</div>
+<small class="text-secondary">Bobina largura 330mm x 3000m</small>
+</td>
+<td class="">
+<span class="badge badge-unit font-monospace">m</span>
+</td>
+<td class="">
+<span class="fw-semibold text-secondary">2.000 m</span>
+</td>
+<td class="">
+<span class="fw-bold text-danger">850 m</span>
+</td>
+<td class="">
+<span class="badge badge-status-danger d-inline-flex align-items-center gap-1 px-2 py-1">
+<i class="bi bi-arrow-down-circle-fill" style="font-size: 0.65rem;"></i> Repor Imediato
+                          </span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+<!-- Linha 4 -->
+<tr>
+<td class="">
+<div class="fw-bold text-light">Verniz de Sobreimpressão Base D'água</div>
+<small class="text-secondary">Bombona 20 Litros com aditivo secante</small>
+</td>
+<td class="">
+<span class="badge badge-unit font-monospace">L</span>
+</td>
+<td class="">
+<span class="fw-semibold text-secondary">80 L</span>
+</td>
+<td class="">
+<span class="fw-bold text-success">160 L</span>
+</td>
+<td class="">
+<span class="badge badge-status-approved d-inline-flex align-items-center gap-1 px-2 py-1">
+<i class="bi bi-check-circle-fill" style="font-size: 0.65rem;"></i> Confortável
+                          </span>
+</td>
+<td class="text-end">
+<button class="btn btn-sm btn-outline-secondary p-1 border-0 text-secondary" title="Editar" type="button">
+<i class="bi bi-pencil-square"></i>
+</button>
+<button class="btn btn-sm btn-outline-danger p-1 border-0" title="Excluir" type="button">
+<i class="bi bi-trash"></i>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Paginação Dark -->
+<div class="card-footer border-top py-3 d-flex flex-wrap justify-content-between align-items-center gap-2" style="background-color: #0e1218; border-color: var(--border-dark) !important;">
+<span class="text-secondary small">Exibindo <strong>1 a 4</strong> de <strong>42</strong> insumos cadastrados</span>
+<nav aria-label="Navegação de páginas de materiais">
+<ul class="pagination pagination-sm m-0">
+<li class="page-item disabled">
+<a aria-disabled="true" class="page-link" href="#" tabindex="-1">Anterior</a>
+</li>
+<li aria-current="page" class="page-item active">
+<a class="page-link" href="#">1</a>
+</li>
+<li class="page-item"><a class="page-link" href="#">2</a></li>
+<li class="page-item"><a class="page-link" href="#">3</a></li>
+<li class="page-item"><a class="page-link" href="#">4</a></li>
+<li class="page-item">
+<a class="page-link" href="#">Próximo</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Rodapé Corporativo Dark Neon -->
+<footer class="py-3 px-4">
+<div class="container-fluid d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+<div class="">
+<strong class="text-light">Gráfica EPA Ltda</strong> © 2024 — Sistema Integrado de PCP, Controle de Estoque e Almoxarifado Industrial.
+      </div>
+<div class="d-flex align-items-center gap-3">
+<span class="text-secondary"><i class="bi bi-hdd-network text-success me-1"></i> Servidor Interno Online</span>
+<span class="text-secondary">•</span>
+<span class="text-secondary">Suporte do Sistema: ramal 4012</span>
+</div>
+</div>
+</footer>
+<!-- Bootstrap 5.3 JS Bundle com Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body></html>
