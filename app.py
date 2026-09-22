@@ -1,11 +1,9 @@
-import email
 import os
 
-
+import page
 import requests
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user, UserMixin
-
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask_login import LoginManager, login_user, current_user, UserMixin
 
 app = Flask(__name__)
 
@@ -28,8 +26,18 @@ class UserSession(UserMixin):
         self.id = id
         self.nome = nome
 
+# ==============================================================================
+# ADICIONADO: Obrigatório para o Flask-Login saber quem está conectado entre os cliques
+# ==============================================================================
+@login_manager.user_loader
+def load_user(user_id):
+    user_name = session.get('user_name')
+    return UserSession(id=user_id, nome=user_name)
 
 
+@app.route('/')
+def index():
+    return render_template('login.html')
 
 @app.route('/login', methods=['GET', 'POST']) # Adicionado 'GET' para renderizar a página inicialmente
 def login():
@@ -64,7 +72,7 @@ def login():
                 flash(erro, 'danger')
         except requests.exceptions.RequestException as e:
             print(f"\n[ERRO DE CONEXÃO NO LOGIN]: {e}\n")
-            flash('Erro de conexão com o servidor login (API fora do ar).', 'danger')
+            flash('Erro de conexão com o servidor central (API fora do ar).', 'danger')
 
     return render_template('login.html')
 
@@ -72,7 +80,7 @@ def login():
 @app.route('/usuarios', methods=['GET', 'POST']) # Adicionado 'GET' para renderizar a página inicialmente
 def cadastro():
     if current_user.is_authenticated:
-        return redirect(url_for('cadastro'))
+        return redirect(url_for('centro_logistico'))
 
     if request.method == 'POST':
         dados_usuario = {
@@ -92,54 +100,25 @@ def cadastro():
                 flash(erro, 'danger')
         except requests.exceptions.RequestException as e:
             print(f"\n[ERRO DE CONEXÃO NO CADASTRO]: {e}\n")
-            flash('Erro de conexão com o servidor cadastro (API fora do ar).', 'danger')
+            flash('Erro de conexão com o servidor central (API fora do ar).', 'danger')
 
     return render_template('cadastro.html')
 
-
-@app.route('/material', methods=['GET', 'POST'])
-@login_required
-def api_material():
-    if request.method == 'POST':
-        dados_formulario = {
-            "produtos_vincular": request.form.get('produtos_vincular'),
-            "id_material": request.form.get('id_equipe'),
-            "produtos_vinculados": request.form.get('produtos_vincular'),
-            "codigo_material": request.form.get('codigo_material'),
-            "descriçao_material": request.form.get('descriçao_material'),
-            "unidade_medida": request.form.get('unidade_medida'),
-
-        }
-        try:
-            resposta = requests.post(f"{API_URL}/material", json=dados_formulario, timeout=5, proxies=DESVIAR_PROXY)
-            if resposta.status_code == 201:
-                flash('material de distribuição cadastrado com sucesso!', 'success')
-                return redirect(url_for('visualizar_material'))
-            elif resposta.status_code in [400, 409]:
-                flash(resposta.json().get('erro'), 'warning')
-        except requests.exceptions.RequestException:
-            flash('Servidor material offline.', 'danger')
-
-    # CORREÇÃO: Aponta para o nome real do arquivo físico na sua pasta
-    return render_template('api_material.html')
-
 @app.route('/equipe')
-@login_required
+
 def montar_equipe():
-    # CAPTURA: Pega a página atual da URL (padrão é 1)
     page = request.args.get('page', 1, type=int)
 
     try:
-        # ENVIO: Passa o parâmetro page na requisição para a API
         resposta = requests.get(f"{API_URL}/equipe", params={"page": page}, timeout=5, proxies=DESVIAR_PROXY)
         if resposta.status_code == 200:
             dados = resposta.json()
             return render_template(
                 'montar_equipe.html',
-                equipe=dados.get('montar_equipe', []),
+                equipe=dados.get('lista_equipe', []),       # AJUSTADO: era 'montar_equipe'
                 current_page=dados.get('current_page', 1),
                 total_pages=dados.get('total_pages', 1),
-                total_items=dados.get('total_items', 0)
+                total_items=dados.get('total_equipe', 0)    # AJUSTADO: era 'total_items'
             )
         else:
             flash('Erro ao carregar equipe de distribuição.', 'warning')
@@ -149,107 +128,477 @@ def montar_equipe():
 
     return render_template('equipe.html', equipe=[], current_page=1, total_pages=1, total_items=0)
 
+@app.route('/cadastrar_equipe', methods=['GET', 'POST']) # SUGESTÃO: Mudei a rota web para não conflitar localmente com a de cima se estiverem no mesmo arquivo web
 
-@app.route('/material')
-@login_required
-def api_material():
-    # CAPTURA: Pega a página atual da URL (padrão é 1)
-    page = request.args.get('page', 1, type=int)
-
-    try:
-        # ENVIO: Passa o parâmetro page na requisição para a API
-        resposta = requests.get(f"{API_URL}/material", params={"page": page}, timeout=5, proxies=DESVIAR_PROXY)
-        if resposta.status_code == 200:
-            dados = resposta.json()
-            return render_template(
-                'material.html',
-                material=dados.get('material', []),
-                current_page=dados.get('current_page', 1),
-                total_pages=dados.get('total_pages', 1),
-                total_items=dados.get('total_items', 0)
-            )
-        else:
-            flash('Erro ao carregar material de distribuição.', 'warning')
-    except requests.exceptions.RequestException as e:
-        print(f"Erro: {e}")
-        flash('Servidor material offline.', 'danger')
-
-    return render_template('material.html', material=[], current_page=1, total_pages=1, total_items=0)
-
-
-
-@app.route('/produçao')
-@login_required
-def a_produçao():
-    # CAPTURA: Pega a página atual da URL (padrão é 1)
-    page = request.args.get('page', 1, type=int)
-
-    try:
-        # ENVIO: Passa o parâmetro page na requisição para a API
-        resposta = requests.get(f"{API_URL}/produçao", params={"page": page}, timeout=5, proxies=DESVIAR_PROXY)
-        if resposta.status_code == 200:
-            dados = resposta.json()
-            return render_template(
-                'produçao.html',
-                produçao=dados.get('produçao', []),
-                current_page=dados.get('current_page', 1),
-                total_pages=dados.get('total_pages', 1),
-                total_items=dados.get('total_items', 0)
-            )
-        else:
-            flash('Erro ao carregar produçao de distribuição.', 'warning')
-    except requests.exceptions.RequestException as e:
-        print(f"Erro: {e}")
-        flash('Servidor produçao offline.', 'danger')
-
-    return render_template('produçao.html', produçao=[], current_page=1, total_pages=1, total_items=0)
-
-
-@app.route('/equipe', methods=['GET', 'POST'])
-@login_required
-def api_equipe():
+def cadastrar_equipe():
     if request.method == 'POST':
+        # AJUSTADO: As chaves do dicionário agora batem exatamente com o que a API espera no request.get_json()
         dados_formulario = {
-            "cpf_informados": request.form.get('cpf_informados'),
-            "nome_da_equipe": request.form.get('nome_da_equipe'),
+            "cpf": request.form.get('cpf_informados'),
+            "nome_equipe": request.form.get('nome_da_equipe'),
         }
         try:
             resposta = requests.post(f"{API_URL}/equipe", json=dados_formulario, timeout=5, proxies=DESVIAR_PROXY)
             if resposta.status_code == 201:
-                flash('equipe de distribuição cadastrado com sucesso!', 'success')
+                flash('Equipe de distribuição cadastrada com sucesso!', 'success')
                 return redirect(url_for('visualizar_material'))
-            elif resposta.status_code in [400, 409]:
+            elif resposta.status_code: # Adicionado 404 que sua API retorna se não achar o CPF
                 flash(resposta.json().get('erro'), 'warning')
         except requests.exceptions.RequestException:
             flash('Servidor equipe offline.', 'danger')
 
-    # CORREÇÃO: Aponta para o nome real do arquivo físico na sua pasta
     return render_template('api_equipe.html')
 
-@app.route('/produçao', methods=['GET', 'POST'])
-@login_required
-def a_produçao():
-    if request.method == 'POST':
-        dados_formulario = {
-            "hora_inico_env": request.form.get('hora_inico_env'),
-            "hora_fim_env": request.form.get('hora_fim_env'),
-        }
-        try:
-            resposta = requests.post(f"{API_URL}/produçao", json=dados_formulario, timeout=5, proxies=DESVIAR_PROXY)
-            if resposta.status_code == 201:
-                flash('produçao de distribuição cadastrado com sucesso!', 'success')
-                return redirect(url_for('visualizar_produçao'))
-            elif resposta.status_code in [400, 409]:
-                flash(resposta.json().get('erro'), 'warning')
-        except requests.exceptions.RequestException:
-            flash('Servidor produçao offline.', 'danger')
 
-    # CORREÇÃO: Aponta para o nome real do arquivo físico na sua pasta
-    return render_template('produçao.html')
+# 1. ROTA PARA EXIBIR A TELA E LISTAR AS PRODUÇÕES (GET)
+@app.route('/producao', methods=['GET'])
+
+def listar_producao():
+    page = request.args.get('page', 1, type=int)
+
+    # Simulação de filtros vindos do formulário de busca da tela (opcional)
+    data_filtro = request.args.get('data_producao', '')
+    func_filtro = request.args.get('fk_id_funcinario', '')
+
+    params = {"page": page}
+    if data_filtro: params["data_producao"] = data_filtro
+    if func_filtro: params["fk_id_funcinario"] = func_filtro
+
+    # ATENÇÃO: API exige JWT. Buscando o token que você salvou no login da Web
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.get(
+            f"{API_URL}/producao",
+            params=params,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 200:
+            dados = resposta.json()
+            return render_template(
+                'produçao.html',
+                produçao=dados.get('producao', []),  # Bate com a chave da API
+                current_page=dados.get('current_page', 1),
+                total_pages=dados.get('total_pages', 1),
+                total_items=dados.get('total_items', 0)  # Bate com a chave da API
+            )
+        elif resposta.status_code == 401:
+            flash('Sua sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro ao carregar dados de produção.', 'warning')
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erro de conexão: {e}")
+        flash('Servidor de produção offline.', 'danger')
+
+    return render_template('produçao.html', produçao=[], current_page=1, total_pages=1, total_items=0)
+
+
+# 2. ROTA EXCLUSIVA PARA ENVIAR O CADASTRO (POST)
+@app.route('/producao/cadastrar', methods=['POST'])
+
+def cadastrar_producao():
+    # Coleta os dados que o usuário digitou no <form> do HTML
+    # Certifique-se de que os valores nos métodos .get() batem com os 'name' dos seus inputs HTML
+    dados_formulario = {
+        "fk_id_funcinario": request.form.get('fk_id_funcinario', type=int),
+        "fk_id_equipe": request.form.get('fk_id_equipe', type=int),
+        "hora_inicio_rodagem": request.form.get('hora_inicio_rodagem'),  # Deve vir no formato "HH:MM"
+        "hora_fim_rodagem": request.form.get('hora_fim_rodagem'),  # Deve vir no formato "HH:MM"
+        "material_perda": request.form.get('material_perda'),
+        "quantidade_produto": request.form.get('quantidade_produto')
+    }
+
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.post(
+            f"{API_URL}/producao",
+            json=dados_formulario,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 201:
+            flash('Produção cadastrada com sucesso!', 'success')
+        elif resposta.status_code == 400:
+            # Captura a mensagem de validação exata enviada pela API (ex: "Formato de hora inválido")
+            flash(resposta.json().get('erro', 'Dados inválidos.'), 'warning')
+        elif resposta.status_code == 401:
+            flash('Sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro interno ao cadastrar produção.', 'danger')
+
+    except requests.exceptions.RequestException:
+        flash('Servidor de produção offline.', 'danger')
+
+    return redirect(url_for('listar_producao'))
+
+@app.route('/material', methods=['GET'])
+def montar_material():
+    page = request.args.get('page', 1, type=int)
+
+    # Simulação de filtros vindos do formulário de busca da tela (opcional)
+    material = request.args.get('codigo_material', '')
+    data_filtro = request.args.get('descricao_material', '')
+    func_filtro = request.args.get('unidade_medida', '')
+
+    params = {"page": page}
+    if material: params["codigo_material"] = data_filtro
+    if data_filtro: params["descricao_material"] = data_filtro
+    if func_filtro: params["unidade_medida"] = func_filtro
+
+    # ATENÇÃO: API exige JWT. Buscando o token que você salvou no login da Web
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.get(
+            f"{API_URL}/material",
+            params=params,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 200:
+            dados = resposta.json()
+            return render_template(
+                'material.html',
+                novo_material=dados.get('material', []),  # Bate com a chave da API
+                current_page=dados.get('current_page', 1),
+                total_pages=dados.get('total_pages', 1),
+                total_items=dados.get('total_items', 0)  # Bate com a chave da API
+            )
+        elif resposta.status_code == 401:
+            flash('Sua sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro ao carregar dados de produção.', 'warning')
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erro de conexão: {e}")
+        flash('Servidor de produção offline.', 'danger')
+
+    return render_template('produçao.html',material =[], current_page=1, total_pages=1, total_items=0)
+
+# 2. ROTA EXCLUSIVA PARA ENVIAR O CADASTRO (POST)
+@app.route('/material/cadastrar', methods=['POST'])
+def cadastrar_material():
+    # Coleta os dados que o usuário digitou no <form> do HTML
+    # Certifique-se de que os valores nos métodos .get() batem com os 'name' dos seus inputs HTML
+    lista_materias = {
+        "id_material": request.form.get('id_material'),
+        "produtos_vinculados": request.form.get('produtos_vinculados'),
+        "codigo_material": request.form.get('codigo_material'),  # Deve vir no formato "HH:MM"
+        "descriçao_material": request.form.get('descriçao_material'),  # Deve vir no formato "HH:MM"
+        "unidade_medida": request.form.get('unidade_medida'),
+    }
+
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.post(
+            f"{API_URL}/material",
+            json=lista_materias,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 201:
+            flash('material cadastrada com sucesso!', 'success')
+        elif resposta.status_code == 400:
+            # Captura a mensagem de validação exata enviada pela API (ex: "Formato de hora inválido")
+            flash(resposta.json().get('erro', 'Dados inválidos.'), 'warning')
+        elif resposta.status_code == 401:
+            flash('Sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro interno ao cadastrar material.', 'danger')
+
+    except requests.exceptions.RequestException:
+        flash('Servidor de material offline.', 'danger')
+
+    return redirect(url_for('listar_material'))
+
+
+@app.route('/turno', methods=['GET'])
+def turno():
+    page = request.args.get('page', 1, type=int)
+
+    # Simulação de filtros vindos do formulário de busca da tela (opcional)
+    id_equipe = request.args.get('id_equipe'),
+    nome_equipe = request.args.get('nome_equipe'),
+    hora_inicial = request.args.get('hora_inicial'),
+    hora_fim = request.args.get('hora_fim'),
+
+    params = {"page": page}
+    if id_equipe: params["id_equipe"] = id_equipe
+    if nome_equipe: params["nome_equipe"] = nome_equipe
+    if hora_inicial: params["hora_inicial"] = hora_inicial
+    if hora_fim: params["hora_fim"] = hora_fim
+
+    # ATENÇÃO: API exige JWT. Buscando o token que você salvou no login da Web
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.get(
+            f"{API_URL}/turno",
+            params=params,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 200:
+            dados = resposta.json()
+            return render_template(
+                'turno.html',
+                novo_turno=dados.get('turno', []),  # Bate com a chave da API
+                current_page=dados.get('current_page', 1),
+                total_pages=dados.get('total_pages', 1),
+                total_items=dados.get('total_items', 0)  # Bate com a chave da API
+            )
+        elif resposta.status_code == 401:
+            flash('Sua sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro ao carregar dados de produção.', 'warning')
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erro de conexão: {e}")
+        flash('Servidor de produção offline.', 'danger')
+
+    return render_template('turno.html',turno =[], current_page=1, total_pages=1, total_items=0)
+
+# 2. ROTA EXCLUSIVA PARA ENVIAR O CADASTRO (POST)
+@app.route('/turno/cadastrar', methods=['POST'])
+def cadastrar_turno():
+    # Coleta os dados que o usuário digitou no <form> do HTML
+    # Certifique-se de que os valores nos métodos .get() batem com os 'name' dos seus inputs HTML
+    lista_turnos = {
+        "id_turno": request.form.get('id_turno'),
+        "fk_id_equipe": request.form.get('fk_id_equipe'),
+        "nome_equipe": request.form.get('nome_equipe'),  # Deve vir no formato "HH:MM"
+        "hora_inicio": request.form.get('hora_inicio'),  # Deve vir no formato "HH:MM"
+        "hora_fim": request.form.get('hora_fim'),
+    }
+
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.post(
+            f"{API_URL}/material",
+            json=lista_turnos,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 201:
+            flash('turno cadastrada com sucesso!', 'success')
+        elif resposta.status_code == 400:
+            # Captura a mensagem de validação exata enviada pela API (ex: "Formato de hora inválido")
+            flash(resposta.json().get('erro', 'Dados inválidos.'), 'warning')
+        elif resposta.status_code == 401:
+            flash('Sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro interno ao cadastrar turno.', 'danger')
+
+    except requests.exceptions.RequestException:
+        flash('Servidor de turno offline.', 'danger')
+
+    return redirect(url_for('listar_turno'))
+
+@app.route('/produto', methods=['GET'])
+def montar_produto():
+    page = request.args.get('page', 1, type=int)
+
+    # Simulação de filtros vindos do formulário de busca da tela (opcional)
+    descricao = request.args.get('descricao'),
+    quatidade_planejada = request.args.get('quatidade_planejada'),
+    formato = request.args.get('formato'),
+
+    params = {"page": page}
+    if descricao: params["id_equipe"] = descricao
+    if quatidade_planejada: params["nome_equipe"] = quatidade_planejada
+    if formato: params["hora_inicial"] = formato
+
+    # ATENÇÃO: API exige JWT. Buscando o token que você salvou no login da Web
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.get(
+            f"{API_URL}/produto",
+            params=params,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 200:
+            dados = resposta.json()
+            return render_template(
+                'produto.html',
+                novo_produto=dados.get('produto', []),  # Bate com a chave da API
+                current_page=dados.get('current_page', 1),
+                total_pages=dados.get('total_pages', 1),
+                total_items=dados.get('total_items', 0)  # Bate com a chave da API
+            )
+        elif resposta.status_code == 401:
+            flash('Sua sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro ao carregar dados de produto.', 'warning')
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erro de conexão: {e}")
+        flash('Servidor de produto offline.', 'danger')
+
+    return render_template('produto.html',produto =[], current_page=1, total_pages=1, total_items=0)
+
+# 2. ROTA EXCLUSIVA PARA ENVIAR O CADASTRO (POST)
+@app.route('/produto/cadastrar', methods=['POST'])
+def cadastrar_produto():
+    # Coleta os dados que o usuário digitou no <form> do HTML
+    # Certifique-se de que os valores nos métodos .get() batem com os 'name' dos seus inputs HTML
+    novo_produto = {
+
+        "id_produto": request.form.get('id_produto'),
+        "descriçao": request.form.get('descricao'),
+        "quantidade_planejada": request.form.get('quantidade_planejada'),
+        "formato": request.form.get('formato'),
+        "materiais": request.form.get('formato'),
+
+    }
+
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.post(
+            f"{API_URL}/produto",
+            json=novo_produto,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 201:
+            flash('produto cadastrada com sucesso!', 'success')
+        elif resposta.status_code == 400:
+            # Captura a mensagem de validação exata enviada pela API (ex: "Formato de hora inválido")
+            flash(resposta.json().get('erro', 'Dados inválidos.'), 'warning')
+        elif resposta.status_code == 401:
+            flash('Sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro interno ao cadastrar produto.', 'danger')
+
+    except requests.exceptions.RequestException:
+        flash('Servidor de produto offline.', 'danger')
+
+    return redirect(url_for('novo_produto'))
+
+
+@app.route('/atualizar', methods=['GET', 'POST'])
+def atualizar_usuario(id):
+    if request.method == 'POST':
+        dados_atualizados = {
+            "nome_novo": request.form.get('nome_novo'),
+            "senha_nova": request.form.get('senha_nova'),
+            "email_novo": request.form.get('email_novo'),
+        }
+
+        try:
+            resposta = requests.put(f"{API_URL}/usuarios/{id}", json=dados_atualizados, timeout=5, proxies=DESVIAR_PROXY)
+            if resposta.status_code == 200:
+                flash('Usuario atualizado com sucesso!', 'success')
+                return redirect(url_for('visualizar_centros'))  # CORRIGIDO: Nome exato da sua função de rota anterior
+            else:
+                flash('Erro ao salvar alterações na API.', 'danger')
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao conectar na API: {e}")
+            flash('Servidor central offline para salvar dados.', 'danger')
+
+    # Método GET: Busca os dados atuais do centro para preencher a tela de edição
+    try:
+        resposta = requests.get(f"{API_URL}/usuarios/{id}", timeout=5, proxies=DESVIAR_PROXY)
+        if resposta.status_code == 200:
+            usuarios_dados = resposta.json()
+            return render_template('atualizar.html', atualizar=usuarios_dados)  # CORRIGIDO: Passando a variável com o JSON da API
+        else:
+            flash('Não foi possível localizar este centro de distribuição.', 'warning')
+            return redirect(url_for('visualizar_centros'))
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao buscar centro: {e}")
+        flash('Servidor central offline.', 'danger')
+        return redirect(url_for('visualizar_centros'))
+
+# 2. ROTA EXCLUSIVA PARA ENVIAR O CADASTRO (POST)
+@app.route('/produto/cadastrar', methods=['POST'])
+def cadastrar_produto():
+    # Coleta os dados que o usuário digitou no <form> do HTML
+    # Certifique-se de que os valores nos métodos .get() batem com os 'name' dos seus inputs HTML
+    novo_produto = {
+
+        "id_produto": request.form.get('id_produto'),
+        "descriçao": request.form.get('descricao'),
+        "quantidade_planejada": request.form.get('quantidade_planejada'),
+        "formato": request.form.get('formato'),
+        "materiais": request.form.get('formato'),
+
+    }
+
+    token_jwt = session.get('token_jwt')
+    headers = {"Authorization": f"Bearer {token_jwt}"}
+
+    try:
+        resposta = requests.post(
+            f"{API_URL}/produto",
+            json=novo_produto,
+            headers=headers,
+            timeout=5,
+            proxies=DESVIAR_PROXY
+        )
+
+        if resposta.status_code == 201:
+            flash('produto cadastrada com sucesso!', 'success')
+        elif resposta.status_code == 400:
+            # Captura a mensagem de validação exata enviada pela API (ex: "Formato de hora inválido")
+            flash(resposta.json().get('erro', 'Dados inválidos.'), 'warning')
+        elif resposta.status_code == 401:
+            flash('Sessão expirou. Faça login novamente.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Erro interno ao cadastrar produto.', 'danger')
+
+    except requests.exceptions.RequestException:
+        flash('Servidor de produto offline.', 'danger')
+
+    return redirect(url_for('novo_produto'))
+
 
 
 
 
 if __name__ == '__main__':
-    # Roda na porta 5002 sem dar conflito com a API
     app.run(debug=True, port=5002, host="0.0.0.0")
+
+
+
+
