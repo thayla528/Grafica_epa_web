@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark" lang="pt-BR">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Gráfica EPA — Cadastro no Sistema</title>
-    <!-- Bootstrap 5.3 CSS CDN -->
-    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
-    <!-- Bootstrap Icons CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
-    <style>
+
+<html data-bs-theme="dark" lang="pt-BR" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gráfica EPA — Login no Sistema</title>
+<!-- Bootstrap 5.3 CSS CDN -->
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet"/>
+<!-- Bootstrap Icons CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<style>
         :root {
             --bs-primary: #0d6efd;
             --bs-body-bg: #0b0e14;
@@ -26,7 +26,7 @@
             background-color: var(--bs-card-bg);
             border: 1px solid var(--bs-border-color);
             border-radius: 1rem;
-            max-width: 560px;
+            max-width: 440px;
             width: 100%;
         }
 
@@ -53,90 +53,293 @@
 <body class="bg-body">
 <!-- Container Principal Centralizado -->
 <main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
-    <div class="card auth-card p-4 p-sm-5" style="border: 1px solid rgba(13, 110, 253, 0.6); box-shadow: rgba(13, 110, 253, 0.45) 0px 0px 15px, rgba(13, 110, 253, 0.2) 0px 0px 30px, rgba(13, 110, 253, 0.15) 0px 0px 15px inset;">
-
-        <!-- Cabeçalho do Card / Branding -->
-        <div class="text-center mb-4">
-            <div class="brand-logo-icon">
-                <i class="bi bi-printer-fill"></i>
-            </div>
-            <h1 class="h3 fw-bold mb-1">Gráfica EPA</h1>
-            <p class="text-secondary small mb-0">Solicitação de Cadastro Industrial</p>
-        </div>
-
-        <!-- Bloco de Alerta Nativo Flask/Jinja2 (Substituiu a div controlada por JS) -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} d-flex align-items-center mb-3" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
-                        <div class="small">{{ message }}</div>
+<div class="card auth-card p-4 p-sm-5" style="max-width: 560px; width: 100%; border: 1px solid rgba(13, 110, 253, 0.6); box-shadow: rgba(13, 110, 253, 0.45) 0px 0px 15px, rgba(13, 110, 253, 0.2) 0px 0px 30px, rgba(13, 110, 253, 0.15) 0px 0px 15px inset;">
+<!-- Cabeçalho do Card / Branding -->
+<div class="text-center mb-4">
+<div class="brand-logo-icon">
+<i class="bi bi-printer-fill"></i>
+</div>
+<h1 class="h3 fw-bold mb-1">Gráfica EPA</h1>
+<p class="text-secondary small mb-0">Gestão Industrial &amp; Painel de Controle</p>
+</div>
+<!-- Caixa de Alerta Dinâmico -->
+<div class="alert d-none d-flex align-items-center mb-3" id="feedbackAlert" role="alert">
+<i class="bi me-2 flex-shrink-0" id="alertIcon"></i>
+<div class="small" id="alertMessage"></div>
+</div>
+<!-- Formulário de Login -->
+<form id="loginForm" novalidate="">
+<!-- Campo de CPF -->
+<div class="mb-3">
+<label class="form-label text-light small fw-semibold" for="cpf">
+<i class="bi bi-person-vcard me-1 text-primary"></i> CPF
+                    </label>
+<input autocomplete="off" class="form-control form-control-lg bg-dark text-light border-secondary" id="cpf" inputmode="numeric" maxlength="14" name="cpf" placeholder="000.000.000-00" required="" type="text"/>
+<div class="invalid-feedback">
+                        Por favor, informe um CPF válido (11 dígitos).
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <!-- Formulário de Cadastro Tradicional apontando para a sua rota /usuarios -->
-        <form action="/usuarios" method="POST">
-
-            <!-- Campo Nome Completo (Adicionado para dar suporte ao campo 'nome' esperado pela API) -->
-            <div class="mb-3">
-                <label class="form-label text-light small fw-semibold" for="nome">
-                    <i class="bi bi-person me-1 text-primary"></i> Nome Completo
-                </label>
-                <input autocomplete="name" class="form-control form-control-lg bg-dark text-light border-secondary" id="nome" name="nome" placeholder="Digite seu nome completo" required type="text"/>
-            </div>
-
-            <!-- Campo de CPF -->
-            <div class="mb-3">
-                <label class="form-label text-light small fw-semibold" for="cpf">
-                    <i class="bi bi-person-vcard me-1 text-primary"></i> CPF
-                </label>
-                <!-- Removido máscara JS, o operador digita apenas números -->
-                <input autocomplete="off" class="form-control form-control-lg bg-dark text-light border-secondary" id="cpf" inputmode="numeric" maxlength="11" name="cpf" placeholder="Digite apenas os 11 números" required type="text"/>
-            </div>
-
-            <!-- Campo de E-mail -->
-            <div class="mb-3">
-                <label class="form-label text-light small fw-semibold" for="email">
-                    <i class="bi bi-envelope me-1 text-primary"></i> E-mail Corporativo
-                </label>
-                <input autocomplete="email" class="form-control form-control-lg bg-dark text-light border-secondary" id="email" name="email" placeholder="operador@graficaepa.com.br" required type="email"/>
-            </div>
-
-            <!-- Campo de Senha -->
-            <div class="mb-3">
-                <label class="form-label text-light small fw-semibold mb-0" for="senha">
-                    <i class="bi bi-shield-lock me-1 text-primary"></i> Senha de Acesso
-                </label>
-                <input autocomplete="new-password" class="form-control form-control-lg bg-dark text-light border-secondary" id="senha" name="senha" placeholder="••••••••" required type="password"/>
-            </div>
-
-            <!-- Campo de Confirmar Senha -->
-            <div class="mb-3">
-                <label class="form-label text-light small fw-semibold mb-0" for="confirmarSenha">
-                    <i class="bi bi-shield-check me-1 text-primary"></i> Confirmar Senha
-                </label>
-                <input autocomplete="new-password" class="form-control form-control-lg bg-dark text-light border-secondary" id="confirmarSenha" name="confirmarSenha" placeholder="••••••••" required type="password"/>
-            </div>
-
-            <!-- Botão de Envio Padrão -->
-            <button class="btn btn-primary btn-lg w-100 fw-semibold d-flex justify-content-center align-items-center gap-2 mt-4" type="submit">
-                <span>Criar Conta no Sistema</span>
-            </button>
-        </form>
-
-        <!-- Rodapé do Card -->
-        <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
-            <p class="text-secondary small mb-0">
-                Já possui uma conta ativa?
-                <a class="text-primary fw-semibold text-decoration-none" href="/login">Fazer login</a>
-            </p>
-        </div>
-    </div>
+</div>
+<!-- Campo de E-mail -->
+<div class="mb-3">
+<label class="form-label text-light small fw-semibold" for="email">
+<i class="bi bi-envelope me-1 text-primary"></i> E-mail Corporativo
+                    </label>
+<input autocomplete="email" class="form-control form-control-lg bg-dark text-light border-secondary" id="email" name="email" placeholder="operador@graficaepa.com.br" required="" type="email"/>
+<div class="invalid-feedback">
+                        Por favor, informe um e-mail válido.
+                    </div>
+</div>
+<!-- Campo de Confirmar Senha (posicionado exatamente antes de Senha) -->
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center mb-1">
+<label class="form-label text-light small fw-semibold mb-0" for="confirmarSenha">
+<i class="bi bi-shield-check me-1 text-primary"></i> Confirmar Senha
+                        </label>
+</div>
+<div class="input-group">
+<input autocomplete="new-password" class="form-control form-control-lg bg-dark text-light border-secondary" id="confirmarSenha" name="confirmarSenha" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Mostrar confirmação de senha" class="btn btn-outline-secondary" id="toggleConfirmPassword" type="button">
+<i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i>
+</button>
+</div>
+<div class="invalid-feedback" id="confirmarSenhaFeedback">
+                        Por favor, confirme sua senha.
+                    </div>
+</div>
+<!-- Campo de Senha -->
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center mb-1">
+<label class="form-label text-light small fw-semibold mb-0" for="senha">
+<i class="bi bi-shield-lock me-1 text-primary"></i> Senha
+                        </label>
+<a class="text-primary text-decoration-none small" href="/recuperar-senha">Esqueceu a senha?</a>
+</div>
+<div class="input-group">
+<input autocomplete="current-password" class="form-control form-control-lg bg-dark text-light border-secondary" id="senha" name="senha" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Mostrar senha" class="btn btn-outline-secondary" id="togglePassword" type="button">
+<i class="bi bi-eye" id="togglePasswordIcon"></i>
+</button>
+</div>
+<div class="invalid-feedback">
+                        Por favor, digite sua senha de acesso.
+                    </div>
+</div>
+<!-- Lembrar de mim -->
+<div class="form-check mb-4">
+<input class="form-check-input" id="rememberMe" type="checkbox"/>
+<label class="form-check-label text-secondary small" for="rememberMe">
+                        Permanecer conectado neste terminal
+                    </label>
+</div>
+<!-- Botão de Envio com Suporte a Spinner -->
+<button class="btn btn-primary btn-lg w-100 fw-semibold d-flex justify-content-center align-items-center gap-2" id="btnSubmit" type="submit">
+<span aria-hidden="true" class="spinner-border spinner-border-sm d-none" id="btnSpinner" role="status"></span>
+<span class="" id="btnText">Entrar no Sistema</span>
+</button>
+</form>
+<!-- Rodapé do Card -->
+<div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
+<p class="text-secondary small mb-0">
+                    Ainda não possui acesso?
+                    <a class="text-primary fw-semibold text-decoration-none" href="/cadastro">Solicitar cadastro</a>
+</p>
+</div>
+</div>
 </main>
+<!-- Bootstrap 5.3 Bundle JS CDN (inclui Popper) -->
+<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Lógica JavaScript (Máscara de CPF, Fetch API & Tratamento de Erros) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            const cpfInput = document.getElementById('cpf');
+            const emailInput = document.getElementById('email');
+            const confirmarSenhaInput = document.getElementById('confirmarSenha');
+            const confirmarSenhaFeedback = document.getElementById('confirmarSenhaFeedback');
+            const senhaInput = document.getElementById('senha');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const btnText = document.getElementById('btnText');
+            const alertBox = document.getElementById('feedbackAlert');
+            const alertIcon = document.getElementById('alertIcon');
+            const alertMessage = document.getElementById('alertMessage');
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+            const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
+            const toggleConfirmPasswordIcon = document.getElementById('toggleConfirmPasswordIcon');
 
-<!-- Bootstrap 5.3 JS Bundle CDN -->
-<script crossorigin="anonymous" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" src="https://jsdelivr.net"></script>
-</body>
-</html>
+            // Máscara dinâmica de CPF (000.000.000-00)
+            if (cpfInput) {
+                cpfInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.slice(0, 11);
+
+                    if (value.length > 9) {
+                        value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, '$1.$2.$3-$4');
+                    } else if (value.length > 6) {
+                        value = value.replace(/^(\d{3})(\d{3})(\d{1,3})$/, '$1.$2.$3');
+                    } else if (value.length > 3) {
+                        value = value.replace(/^(\d{3})(\d{1,3})$/, '$1.$2');
+                    }
+                    e.target.value = value;
+                });
+            }
+
+            // Alternar visibilidade de senha
+            if (togglePasswordBtn) {
+                togglePasswordBtn.addEventListener('click', () => {
+                    const isPassword = senhaInput.type === 'password';
+                    senhaInput.type = isPassword ? 'text' : 'password';
+                    togglePasswordIcon.classList.toggle('bi-eye', !isPassword);
+                    togglePasswordIcon.classList.toggle('bi-eye-slash', isPassword);
+                });
+            }
+
+            // Alternar visibilidade de confirmar senha
+            if (toggleConfirmPasswordBtn) {
+                toggleConfirmPasswordBtn.addEventListener('click', () => {
+                    const isPassword = confirmarSenhaInput.type === 'password';
+                    confirmarSenhaInput.type = isPassword ? 'text' : 'password';
+                    toggleConfirmPasswordIcon.classList.toggle('bi-eye', !isPassword);
+                    toggleConfirmPasswordIcon.classList.toggle('bi-eye-slash', isPassword);
+                });
+            }
+
+            // Exibir alerta padronizado
+            function showAlert(type, message, iconClass) {
+                alertBox.className = `alert alert-${type} d-flex align-items-center mb-3 shadow-sm`;
+                alertIcon.className = `bi ${iconClass} me-2 fs-5 flex-shrink-0`;
+                alertMessage.textContent = message;
+                alertBox.classList.remove('d-none');
+            }
+
+
+            // Ocultar alerta
+            function hideAlert() {
+                alertBox.classList.add('d-none');
+            }
+
+            // Controlar estado do botão durante requisições
+            function setLoadingState(isLoading) {
+                btnSubmit.disabled = isLoading;
+                if (isLoading) {
+                    btnSpinner.classList.remove('d-none');
+                    btnText.textContent = 'Processando...';
+                } else {
+                    btnSpinner.classList.add('d-none');
+                    btnText.textContent = 'Entrar no Sistema';
+                }
+            }
+
+            // Interceptar submit do formulário
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideAlert();
+
+                // Validação de preenchimento
+                let isValid = true;
+                const rawCpf = cpfInput.value.replace(/\D/g, '');
+
+                if (rawCpf.length !== 11) {
+                    cpfInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    cpfInput.classList.remove('is-invalid');
+                }
+
+                if (!emailInput.value.trim()) {
+                    emailInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    emailInput.classList.remove('is-invalid');
+                }
+
+                if (!confirmarSenhaInput.value) {
+                    confirmarSenhaFeedback.textContent = 'Por favor, confirme sua senha.';
+                    confirmarSenhaInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    confirmarSenhaInput.classList.remove('is-invalid');
+                }
+
+                if (!senhaInput.value) {
+                    senhaInput.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    senhaInput.classList.remove('is-invalid');
+                }
+
+                // Checagem se as senhas coincidem
+                if (senhaInput.value && confirmarSenhaInput.value && senhaInput.value !== confirmarSenhaInput.value) {
+                    confirmarSenhaFeedback.textContent = 'As senhas não coincidem.';
+                    confirmarSenhaInput.classList.add('is-invalid');
+                    showAlert('danger', 'As senhas informadas não coincidem. Por favor, verifique.', 'bi-exclamation-triangle-fill');
+                    return;
+                }
+
+                if (!isValid) {
+                    showAlert('danger', 'Por favor, verifique os campos obrigatórios.', 'bi-exclamation-triangle-fill');
+                    return;
+                }
+
+                // Iniciar estado de carregamento
+                setLoadingState(true);
+
+                const payload = {
+                    cpf: cpfInput.value.trim(),
+                    cpf_raw: rawCpf,
+                    email: emailInput.value.trim(),
+                    confirmar_senha: confirmarSenhaInput.value,
+                    senha: senhaInput.value
+                };
+
+                try {
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json().catch(() => ({}));
+
+                    if (response.status === 200) {
+                        // Captura e salva access_token no localStorage
+                        if (data.access_token) {
+                            localStorage.setItem('access_token', data.access_token);
+                        }
+
+                        showAlert('success', 'Autenticação realizada com sucesso! Redirecionando...', 'bi-check-circle-fill');
+
+                        // Redireciona o usuário para /dashboard
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1200);
+                    } else if (response.status === 400 || response.status === 401) {
+                        const errorMsg = data.msg || data.message || 'Credenciais inválidas ou requisição incorreta.';
+                        showAlert('danger', errorMsg, 'bi-x-circle-fill');
+                        setLoadingState(false);
+                    } else {
+                        const unexpectedMsg = data.msg || `Erro inesperado no servidor (${response.status}).`;
+                        showAlert('danger', unexpectedMsg, 'bi-exclamation-octagon-fill');
+                        setLoadingState(false);
+                    }
+
+                } catch (error) {
+                    // Tratamento de falha de conexão ou rede genérica
+                    console.error('Falha na requisição:', error);
+                    showAlert('warning', 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.', 'bi-wifi-off');
+                    setLoadingState(false);
+                }
+            });
+
+            // Limpar indicador de erro ao digitar
+            cpfInput.addEventListener('input', () => cpfInput.classList.remove('is-invalid'));
+            emailInput.addEventListener('input', () => emailInput.classList.remove('is-invalid'));
+            confirmarSenhaInput.addEventListener('input', () => confirmarSenhaInput.classList.remove('is-invalid'));
+            senhaInput.addEventListener('input', () => senhaInput.classList.remove('is-invalid'));
+        });
+    </script>
+</body></html>

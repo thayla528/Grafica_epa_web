@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, current_user, UserMixin
 
 app = Flask(__name__)
 
+
 # Chave de segurança para criptografia dos cookies da sessão
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'Grafica_EPA')
 
