@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produção | Gráfica EPA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topo">
+        <div class="topo-conteudo">
+            <div>
+                <p class="marca">Gráfica EPA</p>
+                <p class="submarca">Registro de produção</p>
+            </div>
+
+            <nav class="navegacao">
+                <a href="{{ url_for('montar_equipe') }}">Equipes</a>
+                <a href="{{ url_for('listar_producao') }}">Produção</a>
+                <a href="{{ url_for('sair') }}">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="pagina">
+        <section class="cartao">
+            <h1>Cadastrar produção</h1>
+            <p class="texto-ajuda">
+                Preencha os dados da produção. Informe os horários de início e fim.
+            </p>
+
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% for categoria, mensagem in mensagens %}
+                    <div class="mensagem mensagem-{{ categoria }}">
+                        {{ mensagem }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            <form class="formulario" method="POST"
+                  action="{{ url_for('cadastrar_producao') }}">
+
+                <div class="campo">
+                    <label for="fk_id_funcinario">ID do funcionário</label>
+                    <input type="number" id="fk_id_funcinario"
+                           name="fk_id_funcinario" min="1" step="1" required>
+                </div>
+
+                <div class="campo">
+                    <label for="fk_id_equipe">ID da equipe</label>
+                    <input type="number" id="fk_id_equipe"
+                           name="fk_id_equipe" min="1" step="1" required>
+                </div>
+
+                <div class="campo">
+                    <label for="hora_inicio_rodagem">Hora de início</label>
+                    <input type="time" id="hora_inicio_rodagem"
+                           name="hora_inicio_rodagem" required>
+                </div>
+
+                <div class="campo">
+                    <label for="hora_fim_rodagem">Hora de fim</label>
+                    <input type="time" id="hora_fim_rodagem"
+                           name="hora_fim_rodagem" required>
+                </div>
+
+                <div class="campo">
+                    <label for="quantidade_produto">Quantidade produzida</label>
+                    <input type="number" id="quantidade_produto"
+                           name="quantidade_produto" min="0" step="1" required>
+                </div>
+
+                <div class="campo">
+                    <label for="material_perda">Material perdido (opcional)</label>
+                    <input type="text" id="material_perda"
+                           name="material_perda"
+                           placeholder="Ex.: 3 folhas">
+                </div>
+
+                <button class="botao" type="submit">Salvar produção</button>
+            </form>
+        </section>
+
+        <section class="cartao" style="margin-top: 22px;">
+            <div class="linha-titulo">
+                <div>
+                    <h2>Produções registradas</h2>
+                    <p class="texto-ajuda">
+                        Use os filtros para procurar um registro.
+                    </p>
+                </div>
+            </div>
+
+            <form class="formulario" method="GET"
+                  action="{{ url_for('listar_producao') }}">
+
+                <div class="campo">
+                    <label for="data_producao">Data</label>
+                    <input type="date" id="data_producao"
+                           name="data_producao"
+                           value="{{ request.args.get('data_producao', '') }}">
+                </div>
+
+                <div class="campo">
+                    <label for="filtro_funcionario">ID do funcionário</label>
+                    <input type="number" id="filtro_funcionario"
+                           name="fk_id_funcinario" min="1" step="1"
+                           value="{{ request.args.get('fk_id_funcinario', '') }}">
+                </div>
+
+                <button class="botao botao-secundario" type="submit">
+                    Filtrar
+                </button>
+
+                <a class="botao botao-secundario"
+                   href="{{ url_for('listar_producao') }}">
+                    Limpar filtros
+                </a>
+            </form>
+
+            <div class="tabela-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Funcionário</th>
+                            <th>Equipe</th>
+                            <th>Data</th>
+                            <th>Início</th>
+                            <th>Fim</th>
+                            <th>Quantidade</th>
+                            <th>Perda</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in producao|default([]) %}
+                            <tr>
+                                <td>{{ item.id_producao }}</td>
+                                <td>{{ item.fk_id_funcinario }}</td>
+                                <td>{{ item.fk_id_equipe }}</td>
+                                <td>{{ item.data_producao }}</td>
+                                <td>{{ item.hora_inicio_rodagem }}</td>
+                                <td>{{ item.hora_fim_rodagem }}</td>
+                                <td>{{ item.quantidade_produto }}</td>
+                                <td>{{ item.material_perda or '-' }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8">
+                                    Nenhuma produção encontrada.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="paginacao">
+                <span class="texto-ajuda">
+                    Página {{ current_page|default(1) }}
+                    de {{ total_pages|default(1) }}
+                    · Total: {{ total_items|default(0) }}
+                </span>
+
+                <div class="acoes">
+                    {% if current_page|default(1) > 1 %}
+                        <a class="botao botao-secundario"
+                           href="{{ url_for(
+                               'listar_producao',
+                               page=current_page - 1,
+                               data_producao=request.args.get('data_producao', ''),
+                               fk_id_funcinario=request.args.get('fk_id_funcinario', '')
+                           ) }}">
+                            Anterior
+                        </a>
+                    {% endif %}
+
+                    {% if current_page|default(1) < total_pages|default(1) %}
+                        <a class="botao botao-secundario"
+                           href="{{ url_for(
+                               'listar_producao',
+                               page=current_page + 1,
+                               data_producao=request.args.get('data_producao', ''),
+                               fk_id_funcinario=request.args.get('fk_id_funcinario', '')
+                           ) }}">
+                            Próxima
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

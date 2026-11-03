@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipes | Gráfica EPA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="topo">
+        <div class="topo-conteudo">
+            <div>
+                <p class="marca">Gráfica EPA</p>
+                <p class="submarca">Organização das equipes</p>
+            </div>
+
+            <nav class="navegacao">
+                <a href="{{ url_for('montar_equipe') }}">Equipes</a>
+                <a href="{{ url_for('cadastro') }}">Cadastrar funcionário</a>
+                <a href="{{ url_for('listar_producao') }}">Produção</a>
+                <a href="{{ url_for('sair') }}">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="pagina">
+        <section class="cartao">
+            <div class="linha-titulo">
+                <div>
+                    <h1>Equipes</h1>
+                    <p class="texto-ajuda">
+                        Veja as equipes cadastradas e crie uma nova equipe.
+                    </p>
+                </div>
+
+                <a class="botao" href="{{ url_for('cadastrar_equipe') }}">
+                    + Cadastrar equipe
+                </a>
+            </div>
+
+            {% with mensagens = get_flashed_messages(with_categories=true) %}
+                {% for categoria, mensagem in mensagens %}
+                    <div class="mensagem mensagem-{{ categoria }}">
+                        {{ mensagem }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            <p class="texto-ajuda">
+                Total de equipes: {{ total_items|default(0) }}
+            </p>
+
+            <div class="tabela-area">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome da equipe</th>
+                            <th>ID do responsável</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in equipe|default([]) %}
+                            <tr>
+                                <td>{{ item.id_equipe }}</td>
+                                <td>{{ item.nome_equipe }}</td>
+                                <td>{{ item.fk_id_func }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3">
+                                    Nenhuma equipe encontrada nesta página.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="paginacao">
+                <span class="texto-ajuda">
+                    Página {{ current_page|default(1) }}
+                    de {{ total_pages|default(1) }}
+                </span>
+
+                <div class="acoes">
+                    {% if current_page|default(1) > 1 %}
+                        <a class="botao botao-secundario"
+                           href="{{ url_for('montar_equipe', page=current_page - 1) }}">
+                            Anterior
+                        </a>
+                    {% endif %}
+
+                    {% if current_page|default(1) < total_pages|default(1) %}
+                        <a class="botao botao-secundario"
+                           href="{{ url_for('montar_equipe', page=current_page + 1) }}">
+                            Próxima
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

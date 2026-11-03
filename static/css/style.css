@@ -1,0 +1,256 @@
+/* Estilo compartilhado de todas as telas da Gráfica EPA.
+   As cores e os tamanhos ficam aqui para o grupo poder mudar facilmente. */
+
+:root {
+    --azul: #1557a6;
+    --azul-escuro: #103d75;
+    --azul-claro: #eaf3ff;
+    --branco: #ffffff;
+    --fundo: #f4f7fb;
+    --texto: #243247;
+    --cinza: #66758a;
+    --borda: #d8e2ef;
+    --verde: #e7f7ed;
+    --vermelho: #fff0f0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+}
+
+.topo {
+    background: var(--azul);
+    color: var(--branco);
+    padding: 18px 24px;
+}
+
+.topo-conteudo {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.marca {
+    margin: 0;
+    font-size: 24px;
+}
+
+.submarca {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: #e2edff;
+}
+
+.navegacao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.navegacao a {
+    color: var(--branco);
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 6px;
+}
+
+.navegacao a:hover {
+    background: var(--azul-escuro);
+}
+
+.pagina {
+    max-width: 1000px;
+    margin: 28px auto;
+    padding: 0 18px;
+}
+
+.cartao {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 3px 12px rgba(16, 61, 117, 0.05);
+}
+
+.cartao-pequeno {
+    max-width: 460px;
+    margin: 40px auto;
+}
+
+h1, h2 {
+    color: var(--azul-escuro);
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 26px;
+}
+
+h2 {
+    font-size: 19px;
+}
+
+.texto-ajuda {
+    color: var(--cinza);
+    line-height: 1.5;
+}
+
+.formulario {
+    display: grid;
+    gap: 14px;
+}
+
+.campo {
+    display: grid;
+    gap: 6px;
+}
+
+label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #bdcde0;
+    border-radius: 7px;
+    background: var(--branco);
+    color: var(--texto);
+    font: inherit;
+}
+
+input:focus, select:focus {
+    outline: 2px solid #b7d6ff;
+    border-color: var(--azul);
+}
+
+.botao {
+    display: inline-block;
+    width: fit-content;
+    border: 0;
+    border-radius: 7px;
+    padding: 11px 16px;
+    background: var(--azul);
+    color: var(--branco);
+    font: inherit;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.botao:hover {
+    background: var(--azul-escuro);
+}
+
+.botao-secundario {
+    background: var(--azul-claro);
+    color: var(--azul-escuro);
+}
+
+.botao-secundario:hover {
+    background: #d7e9ff;
+}
+
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+}
+
+.linha-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.tabela-area {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    background: var(--branco);
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid var(--borda);
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: var(--azul-claro);
+    color: var(--azul-escuro);
+}
+
+.mensagem {
+    padding: 11px 13px;
+    border-radius: 7px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.mensagem-success {
+    background: var(--verde);
+    color: #176236;
+}
+
+.mensagem-danger, .mensagem-error {
+    background: var(--vermelho);
+    color: #8a2020;
+}
+
+.mensagem-warning, .mensagem-info {
+    background: var(--azul-claro);
+    color: var(--azul-escuro);
+}
+
+.paginacao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+
+.rodape {
+    margin: 28px 0 10px;
+    text-align: center;
+    color: var(--cinza);
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .topo-conteudo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .cartao {
+        padding: 18px;
+    }
+
+    .pagina {
+        margin-top: 18px;
+    }
+}
