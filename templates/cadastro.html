@@ -1,17 +1,4 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark" lang="pt-BR">
-<head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Gráfica EPA — Cadastro</title>
-
-    <link crossorigin="anonymous"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          rel="stylesheet">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-          rel="stylesheet">
 
     <style>
         :root {
@@ -23,8 +10,6 @@
 
         body {
             background-color: var(--bs-body-bg);
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto,
-                "Helvetica Neue", Arial, sans-serif;
             min-height: 100vh;
         }
 
@@ -32,7 +17,6 @@
             background-color: var(--bs-card-bg);
             border: 1px solid var(--bs-border-color);
             border-radius: 1rem;
-            max-width: 560px;
             width: 100%;
         }
 
@@ -56,191 +40,68 @@
         }
     </style>
 </head>
-
 <body class="bg-body">
 <main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
-    <div class="card auth-card p-4 p-sm-5"
-         style="border: 1px solid rgba(13, 110, 253, 0.6); box-shadow: rgba(13, 110, 253, 0.45) 0px 0px 15px, rgba(13, 110, 253, 0.2) 0px 0px 30px, rgba(13, 110, 253, 0.15) 0px 0px 15px inset;">
-
         <div class="text-center mb-4">
             <div class="brand-logo-icon">
                 <i class="bi bi-printer-fill"></i>
             </div>
             <h1 class="h3 fw-bold mb-1">Gráfica EPA</h1>
-            <p class="text-secondary small mb-0">
-                Gestão Industrial &amp; Painel de Controle
-            </p>
         </div>
-
-        <div class="alert d-none align-items-center mb-3"
-             id="feedbackAlert" role="alert">
             <i class="bi me-2 flex-shrink-0" id="alertIcon"></i>
             <div class="small" id="alertMessage"></div>
         </div>
-
-        <form id="cadastroForm" action="{{ url_for('cadastro') }}" method="POST" novalidate>
-            <!-- Nome -->
-            <div class="mb-3">
-                <label class="form-label text-light small fw-semibold" for="nome">
-                    <i class="bi bi-person me-1 text-primary"></i> Nome completo
-                </label>
-                <input autocomplete="name"
-                       class="form-control form-control-lg bg-dark text-light border-secondary"
-                       id="nome" name="nome"
-                       placeholder="Digite seu nome completo"
-                       required type="text">
-                <div class="invalid-feedback">Informe seu nome completo.</div>
-            </div>
-
-            <!-- CPF -->
             <div class="mb-3">
                 <label class="form-label text-light small fw-semibold" for="cpf">
                     <i class="bi bi-person-vcard me-1 text-primary"></i> CPF
                 </label>
-                <input autocomplete="off" inputmode="numeric" maxlength="14"
-                       class="form-control form-control-lg bg-dark text-light border-secondary"
-                       id="cpf" name="cpf"
-                       placeholder="000.000.000-00"
-                       required type="text">
                 <div class="invalid-feedback">
-                    Por favor, informe um CPF com 11 dígitos.
                 </div>
             </div>
-
-            <!-- E-mail -->
             <div class="mb-3">
                 <label class="form-label text-light small fw-semibold" for="email">
                     <i class="bi bi-envelope me-1 text-primary"></i> E-mail Corporativo
                 </label>
-                <input autocomplete="email"
-                       class="form-control form-control-lg bg-dark text-light border-secondary"
-                       id="email" name="email"
-                       placeholder="operador@graficaepa.com.br"
-                       required type="email">
-                <div class="invalid-feedback">Informe um e-mail válido.</div>
             </div>
-
-            <!-- Senha -->
             <div class="mb-3">
-                <label class="form-label text-light small fw-semibold" for="senha">
-                    <i class="bi bi-shield-lock me-1 text-primary"></i> Senha
                 </label>
                 <div class="input-group">
-                    <input autocomplete="new-password"
-                           class="form-control form-control-lg bg-dark text-light border-secondary"
-                           id="senha" name="senha"
-                           placeholder="Crie uma senha"
-                           required type="password">
-                    <button aria-label="Mostrar senha"
-                            class="btn btn-outline-secondary"
-                            id="togglePassword" type="button">
-                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
                     </button>
                 </div>
-                <div class="invalid-feedback" id="senhaFeedback">
-                    Digite uma senha.
                 </div>
             </div>
-
-            <!-- Confirmar senha -->
             <div class="mb-3">
-                <label class="form-label text-light small fw-semibold" for="confirmarSenha">
-                    <i class="bi bi-shield-check me-1 text-primary"></i> Confirmar senha
                 </label>
                 <div class="input-group">
-                    <input autocomplete="new-password"
-                           class="form-control form-control-lg bg-dark text-light border-secondary"
-                           id="confirmarSenha" name="confirmarSenha"
-                           placeholder="Digite a senha novamente"
-                           required type="password">
-                    <button aria-label="Mostrar confirmação de senha"
-                            class="btn btn-outline-secondary"
-                            id="toggleConfirmPassword" type="button">
-                        <i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i>
                     </button>
                 </div>
-                <div class="invalid-feedback" id="confirmarSenhaFeedback">
-                    Confirme sua senha.
                 </div>
             </div>
-
             <div class="form-check mb-4">
-                <input class="form-check-input" id="rememberMe" type="checkbox">
                 <label class="form-check-label text-secondary small" for="rememberMe">
                     Permanecer conectado neste terminal
                 </label>
             </div>
-
-            <button class="btn btn-primary btn-lg w-100 fw-semibold d-flex justify-content-center align-items-center gap-2"
-                    id="btnSubmit" type="submit">
-                <span class="spinner-border spinner-border-sm d-none"
-                      id="btnSpinner" aria-hidden="true"></span>
-                <span id="btnText">Criar Conta</span>
             </button>
         </form>
-
         <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-25">
             <p class="text-secondary small mb-0">
-                Já possui acesso?
-                <a class="text-primary fw-semibold text-decoration-none"
-                   href="{{ url_for('login') }}">Entrar no sistema</a>
             </p>
         </div>
     </div>
 </main>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('cadastroForm');
-    const nomeInput = document.getElementById('nome');
     const cpfInput = document.getElementById('cpf');
     const emailInput = document.getElementById('email');
-    const senhaInput = document.getElementById('senha');
     const confirmarSenhaInput = document.getElementById('confirmarSenha');
-
     const btnSubmit = document.getElementById('btnSubmit');
     const btnSpinner = document.getElementById('btnSpinner');
     const btnText = document.getElementById('btnText');
-
     const alertBox = document.getElementById('feedbackAlert');
     const alertIcon = document.getElementById('alertIcon');
     const alertMessage = document.getElementById('alertMessage');
 
-    function showAlert(type, message, iconClass) {
-        alertBox.className = `alert alert-${type} d-flex align-items-center mb-3`;
-        alertIcon.className = `bi ${iconClass} me-2 fs-5 flex-shrink-0`;
-        alertMessage.textContent = message;
-    }
-
-    function setLoading(isLoading) {
-        btnSubmit.disabled = isLoading;
-        btnSpinner.classList.toggle('d-none', !isLoading);
-        btnText.textContent = isLoading ? 'Processando...' : 'Criar Conta';
-    }
-
-    function configurarBotaoSenha(buttonId, input, iconId) {
-        const button = document.getElementById(buttonId);
-        const icon = document.getElementById(iconId);
-
-        button.addEventListener('click', () => {
-            const mostrar = input.type === 'password';
-            input.type = mostrar ? 'text' : 'password';
-            icon.classList.toggle('bi-eye', !mostrar);
-            icon.classList.toggle('bi-eye-slash', mostrar);
-        });
-    }
-
-    configurarBotaoSenha('togglePassword', senhaInput, 'togglePasswordIcon');
-    configurarBotaoSenha(
-        'toggleConfirmPassword',
-        confirmarSenhaInput,
-        'toggleConfirmPasswordIcon'
-    );
-
-    cpfInput.addEventListener('input', () => {
-        let value = cpfInput.value.replace(/\D/g, '').slice(0, 11);
 
         if (value.length > 9) {
             value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, '$1.$2.$3-$4');
@@ -250,121 +111,41 @@ document.addEventListener('DOMContentLoaded', () => {
             value = value.replace(/^(\d{3})(\d{1,3})$/, '$1.$2');
         }
 
-        cpfInput.value = value;
-        cpfInput.classList.remove('is-invalid');
     });
 
-    [nomeInput, emailInput, senhaInput, confirmarSenhaInput].forEach(input => {
-        input.addEventListener('input', () => input.classList.remove('is-invalid'));
     });
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
         alertBox.classList.add('d-none');
 
-        let valido = true;
-        const cpfNumeros = cpfInput.value.replace(/\D/g, '');
 
-        if (!nomeInput.value.trim()) {
-            nomeInput.classList.add('is-invalid');
-            valido = false;
-        }
 
-        if (cpfNumeros.length !== 11) {
             cpfInput.classList.add('is-invalid');
-            valido = false;
         }
 
-        if (!emailInput.checkValidity()) {
             emailInput.classList.add('is-invalid');
-            valido = false;
-        }
-
-        if (!senhaInput.value) {
-            senhaInput.classList.add('is-invalid');
-            valido = false;
         }
 
         if (!confirmarSenhaInput.value) {
-            document.getElementById('confirmarSenhaFeedback').textContent =
-                'Confirme sua senha.';
             confirmarSenhaInput.classList.add('is-invalid');
-            valido = false;
-        } else if (senhaInput.value !== confirmarSenhaInput.value) {
-            document.getElementById('confirmarSenhaFeedback').textContent =
-                'As senhas não coincidem.';
             confirmarSenhaInput.classList.add('is-invalid');
-            valido = false;
-        }
-
-        if (!valido) {
-            showAlert(
-                'danger',
-                'Confira os campos destacados antes de continuar.',
-                'bi-exclamation-triangle-fill'
-            );
             return;
         }
 
-        setLoading(true);
 
         try {
-            const response = await fetch(form.action, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                    'Accept': 'text/html'
                 },
-                body: new URLSearchParams({
-                    nome: nomeInput.value.trim(),
-                    cpf: cpfNumeros,
-                    email: emailInput.value.trim(),
-                    senha: senhaInput.value
-                }),
-                redirect: 'follow'
             });
 
-            if (!response.ok) {
-                throw new Error('Não foi possível concluir o cadastro.');
+
             }
 
-            // A rota Flask redireciona para o login após cadastro bem-sucedido.
-            if (new URL(response.url).pathname === '/login') {
-                window.location.href = response.url;
-                return;
-            }
 
-            const html = await response.text();
-            const documento = new DOMParser().parseFromString(html, 'text/html');
-            const mensagem = documento.querySelector('.alert');
-
-            if (mensagem) {
-                showAlert(
-                    mensagem.classList.contains('alert-success') ? 'success' : 'danger',
-                    mensagem.textContent.trim(),
-                    mensagem.classList.contains('alert-success')
-                        ? 'bi-check-circle-fill'
-                        : 'bi-exclamation-triangle-fill'
-                );
             } else {
-                showAlert(
-                    'danger',
-                    'O cadastro não foi confirmado. Verifique os dados e tente novamente.',
-                    'bi-exclamation-triangle-fill'
-                );
             }
         } catch (error) {
-            console.error('Erro no cadastro:', error);
-            showAlert(
-                'warning',
-                'Não foi possível conectar à WEB. Verifique se o servidor está ligado.',
-                'bi-wifi-off'
-            );
-        } finally {
-            setLoading(false);
         }
     });
 });
 </script>
-</body>
-</html>
