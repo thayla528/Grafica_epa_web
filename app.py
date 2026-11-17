@@ -151,7 +151,6 @@ def cadastrar_equipe():
 
 # 1. ROTA PARA EXIBIR A TELA E LISTAR AS PRODUÇÕES (GET)
 @app.route('/producao', methods=['GET'])
-
 def listar_producao():
     page = request.args.get('page', 1, type=int)
 
